@@ -72,11 +72,18 @@ import {
 const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 3000;
 
+const allowedFrontendUrl = (() => {
+  const url = process.env.FRONTEND_URL;
+  if (!url) return "https://crmcis.vercel.app";
+  return url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+})();
+
 const app = express();
 
+console.log(`Allowed frontend origin: ${allowedFrontendUrl}`);
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "https://crmcis.vercel.app",
-    credentials: true
+    origin: allowedFrontendUrl,
+    credentials: true,
   }));
 app.use(express.json());
 app.use(cookieParser());
