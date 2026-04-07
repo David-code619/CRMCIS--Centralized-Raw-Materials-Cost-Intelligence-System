@@ -202,7 +202,7 @@ export function TransferHistory() {
         searchPlaceholder="Search by material or branch..."
       >
         <select 
-          className="stitch-input h-10 min-w-[140px]"
+          className="stitch-input h-10 min-w-35"
           value={getFilter('status')}
           onChange={(e) => setFilter('status', e.target.value)}
         >

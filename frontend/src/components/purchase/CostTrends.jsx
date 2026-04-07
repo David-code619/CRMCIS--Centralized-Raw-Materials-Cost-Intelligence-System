@@ -50,7 +50,7 @@ export function CostTrends() {
       try {
         const branchId = user?.branchId;
         const url = `${import.meta.env.VITE_API_URL}/api/reports/cost-trends?materialId=${selectedMaterialId}${branchId ? `&branchId=${branchId}` : ''}`;
-        const res = await fetch(url);
+        const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch trends');
         const data = await res.json();
         setTrendData(data);
@@ -129,7 +129,7 @@ export function CostTrends() {
             <TrendingUp className="w-6 h-6 text-text-tertiary" />
           </div>
           <h3 className="text-sm font-bold text-text-primary">No trend data available</h3>
-          <p className="text-xs text-text-tertiary max-w-[200px] mt-1">
+          <p className="text-xs text-text-tertiary max-w-50 mt-1">
             Log more purchases for this material to see historical trends.
           </p>
         </div>

@@ -127,7 +127,7 @@ export function TopNavbar({ onMenuClick, className }) {
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-danger text-white text-[10px] font-bold rounded-full border-2 border-surface flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span className="absolute top-1.5 right-1.5 min-w-4.5 h-4.5 px-1 bg-danger text-white text-[10px] font-bold rounded-full border-2 border-surface flex items-center justify-center group-hover:scale-110 transition-transform">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -158,7 +158,7 @@ export function TopNavbar({ onMenuClick, className }) {
                     )}
                   </div>
 
-                  <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                  <div className="max-h-100 overflow-y-auto custom-scrollbar">
                     {notifications.length === 0 ? (
                       <div className="p-8 text-center">
                         <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center mx-auto mb-3">

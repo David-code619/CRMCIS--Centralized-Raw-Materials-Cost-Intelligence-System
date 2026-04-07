@@ -151,7 +151,7 @@ export function AdjustmentForm({ onSuccess }) {
           </label>
           <textarea
             {...register('notes')}
-            className="stitch-input w-full min-h-[100px] py-3"
+            className="stitch-input w-full min-h-25 py-3"
             placeholder="Describe why this adjustment is necessary..."
           />
         </div>

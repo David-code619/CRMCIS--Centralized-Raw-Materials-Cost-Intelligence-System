@@ -37,7 +37,7 @@ export function ShrinkageSummary() {
         if (!branchId && user?.role !== 'SUPER_ADMIN') return;
 
         const url = branchId ? `${import.meta.env.VITE_API_URL}/api/reports/shrinkage?branchId=${branchId}` : `${import.meta.env.VITE_API_URL}/api/reports/shrinkage`;
-        const res = await fetch(url);
+        const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch shrinkage metrics');
         const data = await res.json();
         setMetrics(data);

@@ -160,9 +160,9 @@ export function TransferApprovalQueue() {
     {
       header: 'Decision',
       accessor: (r) => (
-        <div className="space-y-3 min-w-[200px]">
+        <div className="space-y-3 min-w-50">
           <textarea
-            className="stitch-input w-full text-[10px] py-1.5 min-h-[60px]"
+            className="stitch-input w-full text-[10px] py-1.5 min-h-15"
             placeholder="Add notes..."
             value={approvalNotes[r.id] || ''}
             onChange={(e) => setApprovalNotes(prev => ({ ...prev, [r.id]: e.target.value }))}

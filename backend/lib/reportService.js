@@ -235,6 +235,16 @@ export async function getBranchComparison(filters) {
 export async function getInventoryValueTrend(filters) {
   const { branchId, materialId, category, startDate, endDate } = filters;
   
+  // Get material IDs for category filter
+  let materialIds = null;
+  if (category) {
+    const categoryMaterials = await prisma.materialCatalog.findMany({
+      where: { category },
+      select: { id: true }
+    });
+    materialIds = categoryMaterials.map(m => m.id);
+  }
+  
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const trend = [];
 

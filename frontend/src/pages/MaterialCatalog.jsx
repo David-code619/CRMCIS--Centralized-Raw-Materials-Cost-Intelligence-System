@@ -140,7 +140,7 @@ export function MaterialCatalog() {
           </div>
           <div>
             <p className="font-bold text-text-primary">{material.name}</p>
-            <p className="text-xs text-text-tertiary truncate max-w-[200px]">{material.description || 'No description'}</p>
+            <p className="text-xs text-text-tertiary truncate max-w-50">{material.description || 'No description'}</p>
           </div>
         </div>
       ),
@@ -219,7 +219,7 @@ export function MaterialCatalog() {
         searchPlaceholder="Search materials by name or description..."
       >
         <select 
-          className="stitch-input h-10 min-w-[160px]"
+          className="stitch-input h-10 min-w-40"
           value={getFilter('category')}
           onChange={(e) => setFilter('category', e.target.value === 'All' ? undefined : e.target.value)}
         >
@@ -311,7 +311,7 @@ export function MaterialCatalog() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">Description (Optional)</label>
                   <textarea 
-                    className="stitch-input w-full min-h-[100px] py-3"
+                    className="stitch-input w-full min-h-25 py-3"
                     placeholder="Brief description of the material..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}

@@ -150,7 +150,7 @@ export function AdjustmentHistory() {
       header: 'Details',
       accessor: (a) => (
         <div className="flex flex-col">
-          <span className="text-xs text-text-secondary italic truncate max-w-[150px]">{a.notes || 'No notes'}</span>
+          <span className="text-xs text-text-secondary italic truncate max-w-37.5">{a.notes || 'No notes'}</span>
           <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest mt-1">By {a.loggedBy?.name}</span>
         </div>
       ),
@@ -197,7 +197,7 @@ export function AdjustmentHistory() {
         searchPlaceholder="Search by material, reason, or notes..."
       >
         <select 
-          className="stitch-input h-10 min-w-[140px]"
+          className="stitch-input h-10 min-w-35"
           value={getFilter('status')}
           onChange={(e) => setFilter('status', e.target.value)}
         >

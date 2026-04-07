@@ -325,7 +325,7 @@ export function Users() {
         searchPlaceholder="Search users by name or email..."
       >
         <select 
-          className="stitch-input h-10 min-w-[140px]"
+          className="stitch-input h-10 min-w-35"
           value={getFilter('role')}
           onChange={(e) => setFilter('role', e.target.value)}
         >
@@ -336,7 +336,7 @@ export function Users() {
         </select>
 
         <select 
-          className="stitch-input h-10 min-w-[140px]"
+          className="stitch-input h-10 min-w-35"
           value={getFilter('branchId')}
           onChange={(e) => setFilter('branchId', e.target.value)}
         >
@@ -348,7 +348,7 @@ export function Users() {
         </select>
 
         <select 
-          className="stitch-input h-10 min-w-[140px]"
+          className="stitch-input h-10 min-w-35"
           value={getFilter('isActive')}
           onChange={(e) => setFilter('isActive', e.target.value)}
         >

@@ -211,49 +211,60 @@ export function Reports() {
                 </div>
               </div>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={valueTrend}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1A73E8" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#1A73E8" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                    <XAxis 
-                      dataKey="date" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: chartColors.text, fontSize: 10}} 
-                      dy={10}
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: chartColors.text, fontSize: 10}}
-                      tickFormatter={(v) => `₦${(v/1000).toFixed(0)}k`}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: chartColors.tooltipBg,
-                        borderColor: chartColors.tooltipBorder,
-                        borderRadius: '12px', 
-                        border: '1px solid',
-                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-                      }}
-                      itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
-                      formatter={(v) => [`₦${v.toLocaleString()}`, 'Value']}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#1A73E8" 
-                      strokeWidth={3}
-                      fillOpacity={1} 
-                      fill="url(#colorValue)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {valueTrend.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={valueTrend}>
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#1A73E8" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#1A73E8" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fill: chartColors.text, fontSize: 10}} 
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fill: chartColors.text, fontSize: 10}}
+                        tickFormatter={(v) => `₦${(v/1000).toFixed(0)}k`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: chartColors.tooltipBg,
+                          borderColor: chartColors.tooltipBorder,
+                          borderRadius: '12px', 
+                          border: '1px solid',
+                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                        }}
+                        itemStyle={{ color: chartColors.text }}
+                        labelStyle={{ color: chartColors.text }}
+                        formatter={(v) => [`₦${v.toLocaleString()}`, 'Value']}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#1A73E8" 
+                        strokeWidth={3}
+                        fillOpacity={1} 
+                        fill="url(#colorValue)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <Info className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
+                      <p className="text-text-secondary font-medium">No inventory value data available</p>
+                      <p className="text-text-tertiary text-sm mt-1">Try adjusting your filters or check if purchases exist</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -267,32 +278,44 @@ export function Reports() {
                 <p className="text-xs text-text-tertiary mt-1 font-medium">Highest volume items by usage quantity.</p>
               </div>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={topConsumed} layout="vertical" margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={chartColors.grid} />
-                    <XAxis type="number" hide />
-                    <YAxis 
-                      dataKey="name" 
-                      type="category" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: chartColors.text, fontSize: 10}}
-                      width={80}
-                    />
-                    <Tooltip 
-                      cursor={{fill: theme === 'dark' ? '#3C4043' : '#F8F9FA'}}
-                      contentStyle={{ 
-                        backgroundColor: chartColors.tooltipBg,
-                        borderColor: chartColors.tooltipBorder,
-                        borderRadius: '12px', 
-                        border: '1px solid',
-                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-                      }}
-                      itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
-                    />
-                    <Bar dataKey="value" fill="#1A73E8" radius={[0, 4, 4, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {topConsumed.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={topConsumed} layout="vertical" margin={{ left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={chartColors.grid} />
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fill: chartColors.text, fontSize: 10}}
+                        width={80}
+                      />
+                      <Tooltip 
+                        cursor={{fill: theme === 'dark' ? '#3C4043' : '#F8F9FA'}}
+                        contentStyle={{ 
+                          backgroundColor: chartColors.tooltipBg,
+                          borderColor: chartColors.tooltipBorder,
+                          borderRadius: '12px', 
+                          border: '1px solid',
+                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                        }}
+                        itemStyle={{ color: chartColors.text }}
+                        labelStyle={{ color: chartColors.text }}
+                        formatter={(v) => [`${v} units`, 'Consumed']}
+                      />
+                      <Bar dataKey="value" fill="#1A73E8" radius={[0, 4, 4, 0]} barSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <Info className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
+                      <p className="text-text-secondary font-medium">No consumption data available</p>
+                      <p className="text-text-tertiary text-sm mt-1">Try adjusting your filters or check if usage logs exist</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -309,40 +332,52 @@ export function Reports() {
                   <p className="text-xs text-text-tertiary mt-1 font-medium">Shrinkage rates across all active branches.</p>
                 </div>
                 <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={branchComparison}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                      <XAxis 
-                        dataKey="branchName" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fill: chartColors.text, fontSize: 10}}
-                        dy={10}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fill: chartColors.text, fontSize: 10}}
-                        tickFormatter={(v) => `${v}%`}
-                      />
-                      <Tooltip 
-                        cursor={{fill: theme === 'dark' ? '#3C4043' : '#F8F9FA'}}
-                        contentStyle={{ 
-                          backgroundColor: chartColors.tooltipBg,
-                          borderColor: chartColors.tooltipBorder,
-                          borderRadius: '12px', 
-                          border: '1px solid',
-                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-                        }}
-                        itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
-                      />
-                      <Bar dataKey="shrinkageRate" radius={[4, 4, 0, 0]} barSize={40}>
-                        {branchComparison.map((entry) => (
-                          <Cell key={entry.branchId} fill={entry.shrinkageRate > 5 ? '#EA4335' : '#34A853'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {branchComparison.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={branchComparison}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
+                        <XAxis 
+                          dataKey="branchName" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{fill: chartColors.text, fontSize: 10}}
+                          dy={10}
+                        />
+                        <YAxis 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{fill: chartColors.text, fontSize: 10}}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <Tooltip 
+                          cursor={{fill: theme === 'dark' ? '#3C4043' : '#F8F9FA'}}
+                          contentStyle={{ 
+                            backgroundColor: chartColors.tooltipBg,
+                            borderColor: chartColors.tooltipBorder,
+                            borderRadius: '12px', 
+                            border: '1px solid',
+                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                          }}
+                          itemStyle={{ color: chartColors.text }}
+                          labelStyle={{ color: chartColors.text }}
+                          formatter={(v) => [`${v}%`, 'Shrinkage Rate']}
+                        />
+                        <Bar dataKey="shrinkageRate" radius={[4, 4, 0, 0]} barSize={40}>
+                          {branchComparison.map((entry) => (
+                            <Cell key={entry.branchId} fill={entry.shrinkageRate > 5 ? '#EA4335' : '#34A853'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <Info className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
+                        <p className="text-text-secondary font-medium">No branch comparison data available</p>
+                        <p className="text-text-tertiary text-sm mt-1">Try adjusting your filters or check if branches have data</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -359,7 +359,7 @@ export function BranchMaterialDistribution() {
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-text-tertiary" />
               <select 
-                className="stitch-input h-10 min-w-[160px]"
+                className="stitch-input h-10 min-w-40"
                 value={getFilter('branchId')}
                 onChange={(e) => setFilter('branchId', e.target.value)}
               >
@@ -372,7 +372,7 @@ export function BranchMaterialDistribution() {
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-text-tertiary" />
             <select 
-              className="stitch-input h-10 min-w-[160px]"
+              className="stitch-input h-10 min-w-40"
               value={getFilter('category')}
               onChange={(e) => setFilter('category', e.target.value)}
             >

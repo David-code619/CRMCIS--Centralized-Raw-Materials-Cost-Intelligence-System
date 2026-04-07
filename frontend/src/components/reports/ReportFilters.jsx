@@ -53,7 +53,7 @@ export function ReportFilters({
         </div>
 
         {isSuperAdmin && (
-          <div className="relative min-w-[160px]">
+          <div className="relative min-w-40">
             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
             <select 
               className="stitch-input pl-10 w-full text-xs py-2"
@@ -66,7 +66,7 @@ export function ReportFilters({
           </div>
         )}
 
-        <div className="relative min-w-[160px]">
+        <div className="relative min-w-40">
           <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
           <select 
             className="stitch-input pl-10 w-full text-xs py-2"
@@ -78,7 +78,7 @@ export function ReportFilters({
           </select>
         </div>
 
-        <div className="relative min-w-[160px]">
+        <div className="relative min-w-40">
           <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
           <select 
             className="stitch-input pl-10 w-full text-xs py-2"

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { useAuth } from '../contexts/AuthContext';
-import { cn } from '../lib/utils';
+import { cn, formatNumber } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { DataTable } from '../components/ui/DataTable';
 import { FilterToolbar } from '../components/ui/FilterToolbar';
@@ -344,7 +344,7 @@ export function Inventory() {
             />
             <KPICard 
               title="Total Stock" 
-              value={(stats?.totalStockQuantity || 0).toLocaleString()} 
+              value={formatNumber(stats?.totalStockQuantity || 0)} 
               icon={TrendingUp}
               color="info"
             />
@@ -362,7 +362,7 @@ export function Inventory() {
             />
             <KPICard 
               title="Inventory Value" 
-              value={`₦${(stats?.totalInventoryValue || 0).toLocaleString()}`} 
+              value={`₦${formatNumber(stats?.totalInventoryValue || 0)}`} 
               icon={TrendingUp}
               color="success"
             />
@@ -415,7 +415,7 @@ export function Inventory() {
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-text-tertiary" />
                       <select 
-                        className="stitch-input h-10 min-w-[160px]"
+                        className="stitch-input h-10 min-w-40"
                         value={getFilter('branchId') || ''}
                         onChange={(e) => setFilter('branchId', e.target.value)}
                       >
@@ -428,7 +428,7 @@ export function Inventory() {
                   <div className="flex items-center gap-2">
                     <Filter className="w-4 h-4 text-text-tertiary" />
                     <select 
-                      className="stitch-input h-10 min-w-[160px]"
+                      className="stitch-input h-10 min-w-40"
                       value={getFilter('category') || ''}
                       onChange={(e) => setFilter('category', e.target.value)}
                     >
@@ -439,7 +439,7 @@ export function Inventory() {
                   <div className="flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-text-tertiary" />
                     <select 
-                      className="stitch-input h-10 min-w-[160px]"
+                      className="stitch-input h-10 min-w-40"
                       value={getFilter('status') || ''}
                       onChange={(e) => setFilter('status', e.target.value)}
                     >
@@ -481,7 +481,7 @@ export function Inventory() {
                 <h3 className="text-lg font-bold text-text-primary">Stock Movement History</h3>
                 {isSuperAdmin && (
                   <select 
-                    className="stitch-input h-10 min-w-[200px]"
+                    className="stitch-input h-10 min-w-50"
                     value={getFilter('branchId') || ''}
                     onChange={(e) => {
                       setFilter('branchId', e.target.value);
@@ -521,7 +521,7 @@ export function Inventory() {
                       {inventoryData?.data?.filter(i => i.currentStock > 0 && i.currentStock <= i.reorderThreshold).length || 0} Items
                     </span>
                   </div>
-                  <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
+                  <div className="divide-y divide-border max-h-100 overflow-y-auto">
                     {inventoryData?.data?.filter(i => i.currentStock > 0 && i.currentStock <= i.reorderThreshold).map(item => (
                       <div key={item.id} className="p-4 flex items-center justify-between hover:bg-background transition-colors">
                         <div>
@@ -553,7 +553,7 @@ export function Inventory() {
                       {inventoryData?.data?.filter(i => i.currentStock === 0).length || 0} Items
                     </span>
                   </div>
-                  <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
+                  <div className="divide-y divide-border max-h-100 overflow-y-auto">
                     {inventoryData?.data?.filter(i => i.currentStock === 0).map(item => (
                       <div key={item.id} className="p-4 flex items-center justify-between hover:bg-background transition-colors">
                         <div>

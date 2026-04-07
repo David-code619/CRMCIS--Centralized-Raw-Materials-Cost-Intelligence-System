@@ -162,7 +162,8 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
                         border: '1px solid',
                         boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
                       }}
-                      itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
+                      itemStyle={{ color: chartColors.text }}
+                      labelStyle={{ color: chartColors.text }}
                       formatter={(value) => [`$${value.toLocaleString()}`, 'Value']}
                     />
                     <Bar dataKey="value" fill="#1A73E8" radius={[0, 4, 4, 0]} barSize={24} />
@@ -201,7 +202,8 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
                         border: '1px solid',
                         boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
                       }}
-                      itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
+                      itemStyle={{ color: chartColors.text }}
+                      labelStyle={{ color: chartColors.text }}
                       formatter={(value) => [`$${value.toLocaleString()}`, 'Total Cost']}
                     />
                     <Area type="monotone" dataKey="cost" stroke="#1A73E8" fillOpacity={1} fill="url(#colorCost)" strokeWidth={2} />

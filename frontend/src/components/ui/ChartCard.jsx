@@ -59,7 +59,7 @@ export function ChartCard({
         </div>
       </div>
 
-      <div className="flex-1 min-h-[300px]">
+      <div className="flex-1 min-h-75">
         {children}
       </div>
     </motion.div>

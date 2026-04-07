@@ -192,7 +192,7 @@ export function TransferForm({ onSuccess }) {
           </label>
           <textarea
             {...register('notes')}
-            className="stitch-input w-full min-h-[80px] py-3"
+            className="stitch-input w-full min-h-20 py-3"
             placeholder="Reason for transfer, urgency, etc..."
           />
         </div>

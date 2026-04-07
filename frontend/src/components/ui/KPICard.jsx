@@ -25,7 +25,7 @@ export function KPICard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'stitch-card stitch-card-hover p-5 flex flex-col gap-3',
+        'stitch-card stitch-card-hover p-5 flex flex-col justify-between min-h-30',
         className
       )}
     >
@@ -46,7 +46,13 @@ export function KPICard({
       
       <div>
         <p className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">{title}</p>
-        <h3 className="text-2xl font-bold text-text-primary tracking-tight">{value}</h3>
+        <h3 
+          className="text-2xl font-bold text-text-primary tracking-tight overflow-hidden text-ellipsis whitespace-nowrap"
+          style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)' }}
+          title={value}
+        >
+          {value}
+        </h3>
         {description && (
           <p className="text-xs text-text-tertiary mt-1">{description}</p>
         )}
