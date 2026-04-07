@@ -7,6 +7,7 @@ import { InventoryOfficerDashboard } from '../components/dashboard/InventoryOffi
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSystemStatus } from '../contexts/SystemStatusContext';
+import { apiFetch } from '../lib/api';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export function Dashboard() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/stats`, { credentials: 'include' });
+      const res = await apiFetch('/api/stats');
       if (res.status === 401) {
         window.location.href = '/login';
         return;

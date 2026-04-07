@@ -33,7 +33,7 @@ export function SystemGuard({ children }) {
       
       let res;
       try {
-        res = await apiFetch('/api/health', { signal: controller.signal });
+        res = await apiFetch('/api/health', { signal: controller.signal, redirect: 'manual' });
       } catch (fetchErr) {
         try {
           const pingRes = await apiFetch('/api/ping', { signal: controller.signal, credentials: 'same-origin' });
@@ -49,10 +49,18 @@ export function SystemGuard({ children }) {
         clearTimeout(timeoutId);
       }
       
-      if (!res.ok) throw new Error(`System health check failed with status ${res.status}`);
+      // Handle redirects (e.g., HTTP to HTTPS) as successful
+      if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
+        // Redirect is fine, server is reachable
+      } else if (!res.ok) {
+        throw new Error(`System health check failed with status ${res.status}`);
+      }
       
-      const data = await res.json();
-      if (data.status !== 'ok') throw new Error(data.error || 'Database disconnected');
+      // Only try to parse JSON if not a redirect
+      if (res.status < 300 || res.status >= 400) {
+        const data = await res.json();
+        if (data.status !== 'ok') throw new Error(data.error || 'Database disconnected');
+      }
 
       // 2. Data Presence Check - Only if user is authenticated
       if (user) {
@@ -81,11 +89,6 @@ export function SystemGuard({ children }) {
         // If no user, just set ready - branches check will happen after login
         setStatus('ready');
       }
-    } catch (err) {
-      setError(err.message);
-      setStatus('error');
-    }
-  }, [user}
     } catch (err) {
       setError(err.message);
       setStatus('error');
