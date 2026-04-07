@@ -34,6 +34,7 @@ import { useToast } from '../components/ui/Toast';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { ReportFilters } from '../components/reports/ReportFilters';
 import { KPICard } from '../components/ui/KPICard';
+import { exportToCSV } from '../lib/exportUtils';
 import { cn } from '../lib/utils';
 import { apiFetch } from '../lib/api';
 
@@ -157,6 +158,10 @@ export function Reports() {
         materials={materials} 
         categories={categories}
         isSuperAdmin={isSuperAdmin}
+        onExportClick={() => exportToCSV(topConsumed, 'top-consumed-materials', [
+          {header: 'Name', accessor: 'name'}, 
+          {header: 'Value', accessor: 'value'}
+        ])}
       />
 
       {isLoading ? (

@@ -1,6 +1,6 @@
-import { 
-  TrendingUp, 
-  DollarSign, 
+import {
+  TrendingUp,
+  DollarSign,
   AlertTriangle,
   Activity,
   Download,
@@ -9,13 +9,13 @@ import {
   ClipboardCheck,
   FileText
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   AreaChart,
   Area
@@ -26,12 +26,13 @@ import { KPICard } from '../ui/KPICard';
 import { ChartCard } from '../ui/ChartCard';
 import { Breadcrumbs } from '../ui/Breadcrumbs';
 import { StatusBadge } from '../ui/StatusBadge';
+import { exportToCSV } from '../lib/exportUtils';
 import { cn } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 
 export function SuperAdminDashboard({ stats, onRefresh }) {
   const { theme } = useTheme();
-  
+
   const branchComparisonData = stats.branchComparison || [];
   const costTrendData = stats.costTrends || [];
   const alerts = stats.alerts || [];
@@ -76,7 +77,7 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
             Real-time cost and inventory overview across all branches.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Link to="/material-catalog" className="stitch-button-primary flex items-center gap-2">
             <Plus className="w-4 h-4" />
@@ -86,7 +87,10 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
             <RefreshCw className="w-4 h-4" />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button className="stitch-button-secondary flex items-center gap-2">
+          <button onClick={() => exportToCSV(stats.branchComparison, 'branch-comparison', [
+            { header: 'Branch', accessor: 'name' },
+            { header: 'Value', accessor: 'value' }
+          ])} className="stitch-button-secondary flex items-center gap-2">
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Export Global Report</span>
           </button>
@@ -95,38 +99,38 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard 
-          title="Total Stock Value" 
-          value={`$${formatCurrency(stats.totalStockValue || 0)}`} 
-          trend={{ 
-            value: `${Math.abs(stats.trends?.purchases || 0)}%`, 
-            isUp: (stats.trends?.purchases || 0) >= 0 
+        <KPICard
+          title="Total Stock Value"
+          value={`$${formatCurrency(stats.totalStockValue || 0)}`}
+          trend={{
+            value: `${Math.abs(stats.trends?.purchases || 0)}%`,
+            isUp: (stats.trends?.purchases || 0) >= 0
           }}
           icon={DollarSign}
           color="success"
           description="Consolidated value across all branches"
         />
-        <KPICard 
-          title="Chain Cost Increase" 
-          value={`${stats.chainCostIncrease || 0}%`} 
-          trend={{ 
-            value: `${Math.abs(stats.trends?.cost || 0)}%`, 
-            isUp: (stats.trends?.cost || 0) >= 0 
+        <KPICard
+          title="Chain Cost Increase"
+          value={`${stats.chainCostIncrease || 0}%`}
+          trend={{
+            value: `${Math.abs(stats.trends?.cost || 0)}%`,
+            isUp: (stats.trends?.cost || 0) >= 0
           }}
           icon={TrendingUp}
           color="danger"
           description="Average material cost rise this month"
         />
-        <KPICard 
-          title="Highest Shrinkage" 
-          value={stats.highestShrinkageBranch || 'N/A'} 
+        <KPICard
+          title="Highest Shrinkage"
+          value={stats.highestShrinkageBranch || 'N/A'}
           icon={AlertTriangle}
           color="warning"
           description={`Current branch with ${stats.highestShrinkageValue || '0%'} variance`}
         />
-        <KPICard 
-          title="Pending Approvals" 
-          value={stats.pendingApprovalsCount || 0} 
+        <KPICard
+          title="Pending Approvals"
+          value={stats.pendingApprovalsCount || 0}
           icon={ClipboardCheck}
           color="info"
           description="Inter-branch transfers awaiting HQ"
@@ -136,8 +140,8 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <ChartCard 
-            title="Branch Value Distribution" 
+          <ChartCard
+            title="Branch Value Distribution"
             subtitle="Inventory capital allocation by location"
             onRefresh={onRefresh}
           >
@@ -147,21 +151,21 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
                   <BarChart data={branchComparisonData} layout="vertical" margin={{ left: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={chartColors.grid} />
                     <XAxis type="number" hide />
-                    <YAxis 
-                      dataKey="name" 
-                      type="category" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: chartColors.text, fontSize: 12}}
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: chartColors.text, fontSize: 12 }}
                     />
-                    <Tooltip 
-                      cursor={{fill: chartColors.cursor}}
-                      contentStyle={{ 
+                    <Tooltip
+                      cursor={{ fill: chartColors.cursor }}
+                      contentStyle={{
                         backgroundColor: chartColors.tooltipBg,
                         borderColor: chartColors.tooltipBorder,
-                        borderRadius: '12px', 
+                        borderRadius: '12px',
                         border: '1px solid',
-                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
                       }}
                       itemStyle={{ color: chartColors.text }}
                       labelStyle={{ color: chartColors.text }}
@@ -178,8 +182,8 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
         </div>
 
         <div className="lg:col-span-1">
-          <ChartCard 
-            title="Global Cost Trend" 
+          <ChartCard
+            title="Global Cost Trend"
             subtitle="Monthly expenditure growth"
           >
             <div className="h-80">
@@ -188,20 +192,20 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
                   <AreaChart data={costTrendData}>
                     <defs>
                       <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1A73E8" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#1A73E8" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#1A73E8" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#1A73E8" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: chartColors.text, fontSize: 12}} dy={10} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartColors.text, fontSize: 12 }} dy={10} />
                     <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{ 
+                    <Tooltip
+                      contentStyle={{
                         backgroundColor: chartColors.tooltipBg,
                         borderColor: chartColors.tooltipBorder,
-                        borderRadius: '12px', 
+                        borderRadius: '12px',
                         border: '1px solid',
-                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
                       }}
                       itemStyle={{ color: chartColors.text }}
                       labelStyle={{ color: chartColors.text }}
@@ -226,7 +230,7 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
               <Activity className="w-5 h-5 text-primary" />
               <h3 className="font-bold text-text-primary tracking-tight">Chain-wide Alerts</h3>
             </div>
-            <button 
+            <button
               onClick={handleAuditAll}
               className="text-xs font-bold text-primary hover:text-primary-hover transition-colors"
             >
@@ -236,11 +240,11 @@ export function SuperAdminDashboard({ stats, onRefresh }) {
           <div className="divide-y divide-border">
             {alerts.length > 0 ? (
               alerts.map((alert) => (
-                <AlertItem 
+                <AlertItem
                   key={alert.id}
-                  branch={alert.branch} 
-                  item={alert.item} 
-                  variance={alert.variance} 
+                  branch={alert.branch}
+                  item={alert.item}
+                  variance={alert.variance}
                   status={alert.status}
                   time={new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 />

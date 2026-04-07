@@ -16,6 +16,7 @@ import { cn, formatNumber } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { DataTable } from '../components/ui/DataTable';
 import { FilterToolbar } from '../components/ui/FilterToolbar';
+import { exportToCSV } from '../lib/exportUtils';
 import { useDataTable } from '../hooks/useDataTable';
 import { KPICard } from '../components/ui/KPICard';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -410,6 +411,7 @@ export function Inventory() {
                 searchValue={search}
                 onSearchChange={setSearch}
                 searchPlaceholder="Search by material name, SKU..."
+                onExportClick={() => exportToCSV(inventoryData?.data || [], 'inventory', columns)}
               >
                 <div className="flex flex-wrap items-center gap-3">
                   {isSuperAdmin && (

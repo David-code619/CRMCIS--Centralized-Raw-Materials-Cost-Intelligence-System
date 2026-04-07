@@ -180,42 +180,49 @@ export function BranchManagerDashboard({ stats, onRefresh }) {
             title="Inventory Composition" 
             subtitle="Stock value by category"
           >
-            <div className="h-80">
+            <div className="h-80 flex flex-col min-h-0">
               {stockLevelData.length > 0 ? (
                 <>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={stockLevelData}
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {stockLevelData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: chartColors.tooltipBg,
-                          borderColor: chartColors.tooltipBorder,
-                          borderRadius: '12px', 
-                          border: '1px solid',
-                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-                        }}
-                        itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
-                        formatter={(value) => [`${value}%`, 'Share']}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-wrap justify-center gap-4 mt-4">
-                    {stockLevelData.map((entry) => (
-                      <div key={entry.name} className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                        <span className="text-xs font-medium text-text-secondary">{entry.name}</span>
-                      </div>
-                    ))}
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={stockLevelData}
+                          innerRadius={50}
+                          outerRadius={70}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {stockLevelData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: chartColors.tooltipBg,
+                            borderColor: chartColors.tooltipBorder,
+                            borderRadius: '12px', 
+                            border: '1px solid',
+                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                          }}
+                          itemStyle={{ color: theme === 'dark' ? '#E8EAED' : '#202124' }}
+                          formatter={(value) => [`${value}%`, 'Share']}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="mt-3 max-h-20 overflow-y-auto">
+                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 px-2 pb-1">
+                      {stockLevelData.map((entry) => (
+                        <div key={entry.name} className="flex items-center gap-2 max-w-full">
+                          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                          <span className="text-xs font-medium text-text-secondary truncate max-w-36">
+                            {entry.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </>
               ) : (
