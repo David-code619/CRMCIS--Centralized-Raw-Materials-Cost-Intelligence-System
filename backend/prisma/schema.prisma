@@ -1,0 +1,284 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+enum Role {
+  SUPER_ADMIN        // Full system access, manages users, branches, and global catalog
+  BRANCH_MANAGER     // Manages a specific branch, approves adjustments
+  INVENTORY_OFFICER  // Logs daily activities (purchases, usage) for a branch
+}
+
+enum AdjustmentReason {
+  WASTE
+  LOSS
+  CORRECTION
+  DAMAGE
+  EXPIRATION
+  OTHER
+}
+
+enum TransferStatus {
+  REQUESTED
+  PENDING_APPROVAL
+  APPROVED
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed password for authentication
+  name      String
+  role      Role     @default(INVENTORY_OFFICER)
+  branchId  String?  // Null for SUPER_ADMIN, required for others
+  isActive  Boolean  @default(true)
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations for tracking user activities
+  purchases       Purchase[]
+  usageLogs       UsageLog[]
+  adjustments     StockAdjustment[]
+  approvedAdjustments StockAdjustment[] @relation("ApprovedAdjustments")
+  transfersLogged Transfer[]        @relation("LoggedBy")
+  approvals       TransferApproval[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+
+  @@index([email])
+  @@index([branchId])
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A branch has many users and tracks its own inventory/activities
+  users            User[]
+  branchMaterials  BranchMaterial[]
+  usageBenchmarks  UsageBenchmark[]
+  transfersFrom    Transfer[]       @relation("BranchFrom")
+  transfersTo      Transfer[]       @relation("BranchTo")
+  purchases        Purchase[]
+  usageLogs        UsageLog[]
+  adjustments      StockAdjustment[]
+
+  @@index([name])
+}
+
+model MaterialCatalog {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  category    String
+  unit        String   // e.g., kg, liters, pcs
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  branchMaterials BranchMaterial[]
+  usageBenchmarks UsageBenchmark[]
+  purchases       Purchase[]
+  usageLogs       UsageLog[]
+  adjustments     StockAdjustment[]
+  transfers       Transfer[]
+
+  @@index([category])
+  @@index([name])
+}
+
+model BranchMaterial {
+  id               String   @id @default(cuid())
+  branchId         String
+  materialId       String
+  isActive         Boolean  @default(true)
+  reorderThreshold Float    @default(0)
+  
+  // Optimization fields: These are updated via transactions in service layers.
+  // currentStock: The current quantity available at this branch.
+  // avgCost: Weighted Average Cost calculated from purchase history.
+  currentStock     Float    @default(0)
+  avgCost          Float    @default(0) 
+  
+  branch           Branch          @relation(fields: [branchId], references: [id])
+  material         MaterialCatalog @relation(fields: [materialId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([branchId, materialId])
+  @@index([branchId])
+  @@index([materialId])
+}
+
+model Purchase {
+  id              String   @id @default(cuid())
+  branchId        String
+  materialId      String
+  quantity        Float
+  unitPrice       Float
+  totalCost       Float
+  supplier        String?
+  invoiceRef      String?
+  purchaseDate    DateTime @default(now())
+  loggedById      String
+  
+  branch          Branch          @relation(fields: [branchId], references: [id])
+  material        MaterialCatalog @relation(fields: [materialId], references: [id])
+  loggedBy        User            @relation(fields: [loggedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([branchId, materialId])
+  @@index([purchaseDate])
+}
+
+model UsageLog {
+  id              String   @id @default(cuid())
+  branchId        String
+  materialId      String
+  quantityUsed    Float
+  usageDate       DateTime @default(now())
+  loggedById      String
+  
+  // Flagged if variance > threshold compared to UsageBenchmark
+  isSuspicious    Boolean  @default(false)
+  varianceAmount  Float?   // Difference from benchmark
+  
+  branch          Branch          @relation(fields: [branchId], references: [id])
+  material        MaterialCatalog @relation(fields: [materialId], references: [id])
+  loggedBy        User            @relation(fields: [loggedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([branchId, materialId])
+  @@index([usageDate])
+}
+
+model UsageBenchmark {
+  id              String   @id @default(cuid())
+  branchId        String
+  materialId      String
+  expectedUsage   Float    // Benchmark quantity (e.g., per 100 covers or per day)
+  threshold       Float    @default(0.1) // Percentage (e.g., 0.1 for 10%) for suspicious flagging
+  
+  branch          Branch          @relation(fields: [branchId], references: [id])
+  material        MaterialCatalog @relation(fields: [materialId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([branchId, materialId])
+}
+
+model StockAdjustment {
+  id              String           @id @default(cuid())
+  branchId        String
+  materialId      String
+  quantity        Float            // Positive for add, negative for subtract
+  reason          AdjustmentReason
+  notes           String?
+  status          TransferStatus   @default(PENDING_APPROVAL) // Reusing TransferStatus for simplicity
+  adjustmentDate  DateTime         @default(now())
+  loggedById      String
+  approvedById    String?
+  
+  branch          Branch          @relation(fields: [branchId], references: [id])
+  material        MaterialCatalog @relation(fields: [materialId], references: [id])
+  loggedBy        User            @relation(fields: [loggedById], references: [id])
+  approvedBy      User?           @relation("ApprovedAdjustments", fields: [approvedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([branchId, materialId])
+  @@index([status])
+}
+
+model Transfer {
+  id              String         @id @default(cuid())
+  fromBranchId    String
+  toBranchId      String
+  materialId      String
+  quantity        Float
+  status          TransferStatus @default(REQUESTED)
+  notes           String?
+  transferDate    DateTime       @default(now())
+  loggedById      String
+
+  fromBranch      Branch          @relation("BranchFrom", fields: [fromBranchId], references: [id])
+  toBranch        Branch          @relation("BranchTo", fields: [toBranchId], references: [id])
+  material        MaterialCatalog @relation(fields: [materialId], references: [id])
+  loggedBy        User            @relation("LoggedBy", fields: [loggedById], references: [id])
+  
+  approvals       TransferApproval[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fromBranchId])
+  @@index([toBranchId])
+  @@index([status])
+}
+
+model TransferApproval {
+  id              String         @id @default(cuid())
+  transferId      String
+  approvedById    String
+  status          TransferStatus // APPROVED or REJECTED
+  notes           String?
+  
+  transfer        Transfer @relation(fields: [transferId], references: [id])
+  approvedBy      User     @relation(fields: [approvedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([transferId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String   // e.g., "CREATE", "UPDATE", "DELETE", "LOGIN"
+  entityName  String   // e.g., "BranchMaterial"
+  entityId    String
+  oldValues   Json?
+  newValues   Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([entityName, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  link        String?  // Optional link to the relevant entity
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+}
