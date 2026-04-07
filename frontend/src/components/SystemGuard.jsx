@@ -13,6 +13,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, AlertCircle, Database, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { apiFetch } from '../lib/api';
 import { SystemStatusProvider } from '../contexts/SystemStatusContext';
 
 export function SystemGuard({ children }) {
@@ -32,10 +33,10 @@ export function SystemGuard({ children }) {
       
       let res;
       try {
-        res = await fetch(`${import.meta.env.VITE_API_URL}/api/health`, { signal: controller.signal, credentials: 'include' });
+        res = await apiFetch('/api/health', { signal: controller.signal });
       } catch (fetchErr) {
         try {
-          const pingRes = await fetch(`${import.meta.env.VITE_API_URL}/api/ping`, { signal: controller.signal });
+          const pingRes = await apiFetch('/api/ping', { signal: controller.signal, credentials: 'same-origin' });
           if (pingRes.ok) {
             throw new Error('Server is reachable but the database connection is failing.', { cause: fetchErr });
           }
@@ -53,33 +54,43 @@ export function SystemGuard({ children }) {
       const data = await res.json();
       if (data.status !== 'ok') throw new Error(data.error || 'Database disconnected');
 
-      // 2. Data Presence Check
-      const branchController = new AbortController();
-      const branchTimeoutId = setTimeout(() => branchController.abort(), 15000);
-      
-      try {
-        const branchRes = await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { signal: branchController.signal, credentials: 'include' });
-        if (branchRes.ok) {
-          const branches = await branchRes.json();
-          clearTimeout(branchTimeoutId);
-          if (Array.isArray(branches) && branches.length === 0) {
-            setStatus('empty');
+      // 2. Data Presence Check - Only if user is authenticated
+      if (user) {
+        const branchController = new AbortController();
+        const branchTimeoutId = setTimeout(() => branchController.abort(), 15000);
+        
+        try {
+          const branchRes = await apiFetch('/api/branches', { signal: branchController.signal });
+          if (branchRes.ok) {
+            const branches = await branchRes.json();
+            clearTimeout(branchTimeoutId);
+            if (Array.isArray(branches) && branches.length === 0) {
+              setStatus('empty');
+            } else {
+              setStatus('ready');
+            }
           } else {
+            clearTimeout(branchTimeoutId);
             setStatus('ready');
           }
-        } else {
+        } catch (branchErr) {
           clearTimeout(branchTimeoutId);
           setStatus('ready');
         }
-      } catch (branchErr) {
-        clearTimeout(branchTimeoutId);
+      } else {
+        // If no user, just set ready - branches check will happen after login
         setStatus('ready');
       }
     } catch (err) {
       setError(err.message);
       setStatus('error');
     }
-  }, []);
+  }, [user}
+    } catch (err) {
+      setError(err.message);
+      setStatus('error');
+    }
+  }, [user]);
 
   useEffect(() => {
     checkSystem();
