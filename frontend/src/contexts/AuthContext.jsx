@@ -11,35 +11,44 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(undefined);
+const API_BASE = import.meta.env.VITE_API_URL?.trim() || '';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
+
     // On initial load, check if the user has a valid session cookie
     console.log('AuthContext: Checking session...');
-    fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, { credentials: 'include' })
+    fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
       .then((res) => {
         console.log('AuthContext: /api/auth/me response status:', res.status);
         return res.ok ? res.json() : null;
       })
       .then((data) => {
+        if (!isActive) return;
         console.log('AuthContext: /api/auth/me data:', data);
-        if (data && typeof data === 'object') {
-          setUser(data);
-        } else {
-          setUser(null);
-        }
+        setUser((currentUser) => {
+          if (currentUser) return currentUser;
+          return data && typeof data === 'object' ? data : null;
+        });
       })
       .catch((err) => {
+        if (!isActive) return;
         console.error('AuthContext: /api/auth/me error:', err);
-        setUser(null);
+        setUser((currentUser) => (currentUser ? currentUser : null));
       })
       .finally(() => {
+        if (!isActive) return;
         console.log('AuthContext: Loading finished');
         setLoading(false);
       });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   /**
@@ -48,7 +57,7 @@ export function AuthProvider({ children }) {
    */
   const login = async (email, password) => {
     console.log('AuthContext: login called with:', { email, password });
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -69,7 +78,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+      await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', credentials: 'include' });
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
