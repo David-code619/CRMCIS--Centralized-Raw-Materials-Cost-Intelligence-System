@@ -80,9 +80,12 @@ const allowedFrontendUrl = (() => {
 
 const app = express();
 
+// Trust proxy headers so req.secure works correctly behind Render and other HTTPS proxies
+app.set('trust proxy', 1);
+
 console.log(`Allowed frontend origin: ${allowedFrontendUrl}`);
 app.use(cors({
-    origin: allowedFrontendUrl,
+    origin: true,
     credentials: true,
   }));
 app.use(express.json());
@@ -212,12 +215,13 @@ app.post("/api/auth/login", async (req, res) => {
       { expiresIn: "24h" },
     );
 
+    const isSecureRequest = req.secure || req.headers["x-forwarded-proto"] === "https";
     res.cookie("token", token, {
       httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      secure: isSecureRequest,
+      path: "/",
+      sameSite: isSecureRequest ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
     const userWithoutPassword = { ...user };
