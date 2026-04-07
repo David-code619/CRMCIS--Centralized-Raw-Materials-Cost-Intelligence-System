@@ -26,7 +26,7 @@ import { KPICard } from '../ui/KPICard';
 import { ChartCard } from '../ui/ChartCard';
 import { Breadcrumbs } from '../ui/Breadcrumbs';
 import { StatusBadge } from '../ui/StatusBadge';
-import { exportToCSV } from '../lib/exportUtils';
+import { exportToCSV } from '../../lib/exportUtils';
 import { cn } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 
