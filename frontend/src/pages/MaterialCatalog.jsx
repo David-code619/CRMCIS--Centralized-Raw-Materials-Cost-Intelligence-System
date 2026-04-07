@@ -58,7 +58,7 @@ export function MaterialCatalog() {
         category: getFilter('category'),
       });
 
-      const response = await fetch(`/api/materials?${queryParams.toString()}`, { credentials: 'include' });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/materials?${queryParams.toString()}`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch materials');
       const result = await response.json();
       setData(result);
@@ -97,7 +97,7 @@ export function MaterialCatalog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingMaterial ? `/api/materials/${editingMaterial.id}` : '/api/materials';
+      const url = editingMaterial ? `${import.meta.env.VITE_API_URL}/api/materials/${editingMaterial.id}` : `${import.meta.env.VITE_API_URL}/api/materials`;
       const method = editingMaterial ? 'PATCH' : 'POST';
       
       const response = await fetch(url, {
@@ -121,7 +121,7 @@ export function MaterialCatalog() {
     if (!confirm('Are you sure you want to remove this material from the global catalog? This may affect branch inventory.')) return;
     
     try {
-      const response = await fetch(`/api/materials/${id}`, { method: 'DELETE', credentials: 'include' });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/materials/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!response.ok) throw new Error('Failed to delete material');
       addToast('Material removed from catalog', 'success');
       fetchMaterials();

@@ -53,7 +53,7 @@ export function BranchManagerDashboard({ stats, onRefresh }) {
 
   const handleAuditBranch = async () => {
     try {
-      const res = await fetch('/api/usage/audit-all', { method: 'POST', credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/usage/audit-all`, { method: 'POST', credentials: 'include' });
       if (res.ok) {
         onRefresh();
       } else {

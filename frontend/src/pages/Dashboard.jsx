@@ -19,7 +19,7 @@ export function Dashboard() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/stats', { credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/stats`, { credentials: 'include' });
       if (res.status === 401) {
         window.location.href = '/login';
         return;

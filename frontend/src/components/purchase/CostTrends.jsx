@@ -27,7 +27,7 @@ export function CostTrends() {
   useEffect(() => {
     async function fetchMaterials() {
       try {
-        const res = await fetch('/api/materials', { credentials: 'include' });
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch materials');
         const result = await res.json();
         const data = Array.isArray(result) ? result : result.data || [];
@@ -49,7 +49,7 @@ export function CostTrends() {
       setIsLoadingTrends(true);
       try {
         const branchId = user?.branchId;
-        const url = `/api/reports/cost-trends?materialId=${selectedMaterialId}${branchId ? `&branchId=${branchId}` : ''}`;
+        const url = `${import.meta.env.VITE_API_URL}/api/reports/cost-trends?materialId=${selectedMaterialId}${branchId ? `&branchId=${branchId}` : ''}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch trends');
         const data = await res.json();

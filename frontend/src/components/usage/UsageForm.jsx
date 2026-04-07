@@ -33,7 +33,7 @@ export function UsageForm({ onSuccess }) {
   useEffect(() => {
     async function fetchMaterials() {
       try {
-        const res = await fetch('/api/inventory', { credentials: 'include' });
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/inventory`, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch inventory');
         const result = await res.json();
         const data = Array.isArray(result) ? result : result.data || [];
@@ -62,7 +62,7 @@ export function UsageForm({ onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/usage', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/usage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -56,7 +56,7 @@ export function AdjustmentHistory() {
         ...(branchId ? { branchId } : {}),
       });
 
-      const res = await fetch(`/api/adjustments?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adjustments?${queryParams.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch adjustments');
       const result = await res.json();
       setData(result);
@@ -74,7 +74,7 @@ export function AdjustmentHistory() {
   const handleAction = async (id, action) => {
     setIsProcessing(id);
     try {
-      const res = await fetch(`/api/adjustments/${id}/${action}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adjustments/${id}/${action}`, {
         method: 'PATCH',
         credentials: 'include',
       });

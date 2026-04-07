@@ -49,7 +49,7 @@ export function PurchaseHistory() {
         ...(branchId ? { branchId } : {}),
       });
 
-      const res = await fetch(`/api/purchases?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases?${queryParams.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch history');
       const result = await res.json();
       setData(result);

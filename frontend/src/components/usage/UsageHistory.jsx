@@ -38,7 +38,7 @@ export function UsageHistory() {
         isSuspicious: getFilter('isSuspicious'),
       });
 
-      const res = await fetch(`/api/usage?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/usage?${queryParams.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch usage logs');
       const result = await res.json();
       setData(result);

@@ -51,8 +51,8 @@ export function PurchaseForm({ onSuccess }) {
     async function fetchData() {
       try {
         const [matRes, branchRes] = await Promise.all([
-          fetch('/api/materials', { credentials: 'include' }),
-          user?.role === 'SUPER_ADMIN' ? fetch('/api/branches', { credentials: 'include' }) : Promise.resolve(null)
+          fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' }),
+          user?.role === 'SUPER_ADMIN' ? fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' }) : Promise.resolve(null)
         ]);
 
         if (!matRes.ok) throw new Error('Failed to fetch materials');
@@ -83,7 +83,7 @@ export function PurchaseForm({ onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/purchases', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

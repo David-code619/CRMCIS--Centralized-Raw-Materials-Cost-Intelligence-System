@@ -45,8 +45,8 @@ export function TransferForm({ onSuccess }) {
     async function fetchData() {
       try {
         const [branchesRes, materialsRes] = await Promise.all([
-          fetch('/api/branches', { credentials: 'include' }),
-          fetch('/api/materials', { credentials: 'include' })
+          fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' })
         ]);
         
         if (!branchesRes.ok || !materialsRes.ok) throw new Error('Failed to fetch data');
@@ -72,7 +72,7 @@ export function TransferForm({ onSuccess }) {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/transfers', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

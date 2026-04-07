@@ -52,7 +52,7 @@ export function TransferApprovalQueue() {
         status: 'REQUESTED',
       });
 
-      const res = await fetch(`/api/transfers?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers?${queryParams.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch requests');
       const result = await res.json();
       setData(result);
@@ -70,7 +70,7 @@ export function TransferApprovalQueue() {
   const handleAction = async (id, action) => {
     setIsProcessing(id);
     try {
-      const res = await fetch(`/api/transfers/${id}/${action}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers/${id}/${action}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

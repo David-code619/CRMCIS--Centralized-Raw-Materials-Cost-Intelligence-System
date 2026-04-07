@@ -38,7 +38,7 @@ export function AdjustmentForm({ onSuccess }) {
   useEffect(() => {
     async function fetchMaterials() {
       try {
-        const res = await fetch('/api/materials', { credentials: 'include' });
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch materials');
         const result = await res.json();
         setMaterials(Array.isArray(result) ? result : result.data || []);
@@ -59,7 +59,7 @@ export function AdjustmentForm({ onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/adjustments', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/adjustments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
