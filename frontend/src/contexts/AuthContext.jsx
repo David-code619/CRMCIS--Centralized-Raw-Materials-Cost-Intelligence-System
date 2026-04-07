@@ -9,9 +9,9 @@
  */
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../lib/api';
 
 const AuthContext = createContext(undefined);
-const API_BASE = import.meta.env.VITE_API_URL?.trim() || '';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
 
     // On initial load, check if the user has a valid session cookie
     console.log('AuthContext: Checking session...');
-    fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+    apiFetch('/api/auth/me')
       .then((res) => {
         console.log('AuthContext: /api/auth/me response status:', res.status);
         return res.ok ? res.json() : null;
@@ -57,10 +57,9 @@ export function AuthProvider({ children }) {
    */
   const login = async (email, password) => {
     console.log('AuthContext: login called with:', { email, password });
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const res = await apiFetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
@@ -78,7 +77,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
