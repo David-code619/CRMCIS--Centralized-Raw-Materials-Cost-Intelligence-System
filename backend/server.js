@@ -75,7 +75,7 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "https://crmcis.vercel.app",
     credentials: true
   }));
 app.use(express.json());
