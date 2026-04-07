@@ -73,8 +73,10 @@ export async function getUsers(
 export async function createUser(data) {
   const { email, name, role, branchId, password } = data;
   
-  // Hash password (default to 'admin123' if not provided for demo/initial setup)
-  const hashedPassword = await bcrypt.hash(password || 'admin123', 10);
+  if (!password) {
+    throw new Error("Password is required");
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   return await prisma.user.create({
     data: {

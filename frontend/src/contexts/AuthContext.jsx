@@ -9,7 +9,7 @@
  */
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { apiFetch } from '../lib/api';
+import { apiFetch, setAuthToken, clearAuthToken } from '../lib/api';
 
 const AuthContext = createContext(undefined);
 
@@ -70,6 +70,7 @@ export function AuthProvider({ children }) {
 
     const userData = await res.json();
     if (userData && typeof userData === 'object') {
+      if (userData.token) setAuthToken(userData.token);
       setUser(userData);
     }
     return userData;
@@ -81,6 +82,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
+      clearAuthToken();
       setUser(null);
     }
   };

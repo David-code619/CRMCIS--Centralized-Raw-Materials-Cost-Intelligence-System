@@ -104,12 +104,6 @@ export function LoginPage() {
             </button>
           </div>
         </form>
-
-        <div className="text-center text-xs text-text-tertiary">
-          <p>Demo credentials:</p>
-          <p className="mt-1">obayidavid02@gmail.com / admin123</p>
-          <p className="mt-1">manager@crmcis.com / admin123</p>
-        </div>
       </div>
     </div>
   );

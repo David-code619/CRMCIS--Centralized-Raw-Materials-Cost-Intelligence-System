@@ -126,7 +126,12 @@ const withTimeout = (promise, timeoutMs = 10000) => {
 // --- AUTHENTICATION MIDDLEWARE ---
 const authenticate = async (req, res, next) => {
   console.log(`[AUTH] Authenticating request to ${req.path}`);
-  const token = req.cookies.token;
+  const authHeader = req.headers.authorization;
+  const bearerToken =
+    typeof authHeader === "string" && authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice(7).trim()
+      : null;
+  const token = bearerToken || req.cookies.token;
   if (!token) {
     console.log(`[AUTH] No token found for ${req.path}`);
     return res.status(401).json({ error: "Unauthorized" });
@@ -174,12 +179,15 @@ const authenticate = async (req, res, next) => {
       `[AUTH] Authentication error for ${req.path}:`,
       error.message,
     );
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-    });
+    // Only clear cookie-based sessions. If client uses Bearer tokens, don't touch cookies.
+    if (!bearerToken) {
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
+    }
     res
       .status(401)
       .json({
@@ -263,7 +271,8 @@ app.post("/api/auth/login", async (req, res) => {
 
     const userWithoutPassword = { ...user };
     delete userWithoutPassword.password;
-    res.json(userWithoutPassword);
+    // Also return the token for clients/environments where third-party cookies are blocked.
+    res.json({ ...userWithoutPassword, token });
   } catch (error) {
     console.error("Login error details:", {
       message: error.message,

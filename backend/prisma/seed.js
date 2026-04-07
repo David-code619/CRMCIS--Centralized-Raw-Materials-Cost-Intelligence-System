@@ -28,7 +28,14 @@ async function main() {
     console.log('ℹ️  Cleanup skipped (tables might be empty):', error.message);
   }
 
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const seedPassword = process.env.SEED_DEFAULT_PASSWORD || 'change-me';
+  if (seedPassword === 'change-me') {
+    console.warn(
+      '⚠️  SEED_DEFAULT_PASSWORD not set; using placeholder password "change-me". ' +
+      'Set SEED_DEFAULT_PASSWORD in your backend .env before using seeded accounts.',
+    );
+  }
+  const hashedPassword = await bcrypt.hash(seedPassword, 10);
 
   // 2. Create Branches
   const branches = await Promise.all([
@@ -40,8 +47,8 @@ async function main() {
   // 3. Create Users
   const superAdmin = await prisma.user.create({
     data: {
-      email: 'obayidavid02@gmail.com',
-      name: 'Super Admin',
+      email: process.env.SEED_SUPER_ADMIN_EMAIL || 'superadmin@example.com',
+      name: process.env.SEED_SUPER_ADMIN_NAME || 'Super Admin',
       password: hashedPassword,
       role: 'SUPER_ADMIN',
     }
@@ -49,8 +56,8 @@ async function main() {
 
   const branchManager = await prisma.user.create({
     data: {
-      email: 'manager@crmcis.com',
-      name: 'Branch Manager',
+      email: process.env.SEED_BRANCH_MANAGER_EMAIL || 'manager@example.com',
+      name: process.env.SEED_BRANCH_MANAGER_NAME || 'Branch Manager',
       password: hashedPassword,
       role: 'BRANCH_MANAGER',
       branchId: branches[0].id,
@@ -59,8 +66,8 @@ async function main() {
 
   const inventoryOfficer = await prisma.user.create({
     data: {
-      email: 'officer@crmcis.com',
-      name: 'Inventory Officer',
+      email: process.env.SEED_INVENTORY_OFFICER_EMAIL || 'officer@example.com',
+      name: process.env.SEED_INVENTORY_OFFICER_NAME || 'Inventory Officer',
       password: hashedPassword,
       role: 'INVENTORY_OFFICER',
       branchId: branches[0].id,
