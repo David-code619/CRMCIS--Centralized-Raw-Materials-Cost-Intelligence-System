@@ -84,10 +84,29 @@ const app = express();
 app.set('trust proxy', 1);
 
 console.log(`Allowed frontend origin: ${allowedFrontendUrl}`);
-app.use(cors({
-    origin: true,
+const isProd = process.env.NODE_ENV === "production";
+
+app.use(
+  cors({
+    // When sending cookies (credentials: true), we must NOT use '*' for ACAO.
+    // Restrict to known frontend origins; fall back to reflecting the request origin in dev.
+    origin: (origin, callback) => {
+      const allowlist = new Set([
+        allowedFrontendUrl,
+        "http://localhost:5173",
+        "http://localhost:3000",
+      ]);
+
+      // same-origin / server-to-server / curl (no Origin header)
+      if (!origin) return callback(null, true);
+
+      if (allowlist.has(origin)) return callback(null, true);
+
+      return callback(new Error(`CORS blocked origin: ${origin}`), false);
+    },
     credentials: true,
-  }));
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -128,7 +147,12 @@ const authenticate = async (req, res, next) => {
 
     if (!user) {
       console.log(`[AUTH] User ${decoded.id} not found in DB, clearing cookie`);
-      res.clearCookie("token");
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
       return res
         .status(401)
         .json({ error: "User no longer exists. Please log in again." });
@@ -150,7 +174,12 @@ const authenticate = async (req, res, next) => {
       `[AUTH] Authentication error for ${req.path}:`,
       error.message,
     );
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
     res
       .status(401)
       .json({
@@ -221,9 +250,11 @@ app.post("/api/auth/login", async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    const isSecureRequest = req.secure || req.headers["x-forwarded-proto"] === "https";
+    const isSecureRequest =
+      req.secure || req.headers["x-forwarded-proto"] === "https" || isProd;
     res.cookie("token", token, {
       httpOnly: true,
+      // Cross-site cookies require: SameSite=None; Secure
       secure: isSecureRequest,
       path: "/",
       sameSite: isSecureRequest ? "none" : "lax",
@@ -244,7 +275,12 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+  });
   res.json({ message: "Logged out" });
 });
 
