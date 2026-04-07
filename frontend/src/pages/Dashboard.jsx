@@ -5,14 +5,15 @@ import { SuperAdminDashboard } from '../components/dashboard/SuperAdminDashboard
 import { BranchManagerDashboard } from '../components/dashboard/BranchManagerDashboard';
 import { InventoryOfficerDashboard } from '../components/dashboard/InventoryOfficerDashboard';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useSystemStatus } from '../contexts/SystemStatusContext';
 import { apiFetch } from '../lib/api';
 
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { addToast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   const { status, error } = useSystemStatus();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
@@ -22,7 +23,9 @@ export function Dashboard() {
     try {
       const res = await apiFetch('/api/stats');
       if (res.status === 401) {
-        window.location.href = '/login';
+        // Avoid hard reload loops; let auth context clear state and route normally.
+        await logout();
+        navigate('/login', { replace: true, state: { from: location } });
         return;
       }
       if (!res.ok) {

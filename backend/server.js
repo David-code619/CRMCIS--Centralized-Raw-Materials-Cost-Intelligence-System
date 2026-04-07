@@ -138,6 +138,14 @@ const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    // IMPORTANT: do not clear a valid session cookie for transient DB timeouts.
+    // This can happen on cold starts (e.g. hosted DB waking up) and should not log users out.
+    if (error?.message === "Database operation timed out") {
+      console.error(
+        `[AUTH] Database timeout while authenticating ${req.path}; preserving session cookie`,
+      );
+      return res.status(503).json({ error: "Database busy" });
+    }
     console.error(
       `[AUTH] Authentication error for ${req.path}:`,
       error.message,
@@ -147,9 +155,7 @@ const authenticate = async (req, res, next) => {
       .status(401)
       .json({
         error:
-          error.message === "Database operation timed out"
-            ? "Database busy"
-            : "Invalid token",
+          "Invalid token",
       });
   }
 };
