@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { Loader2, Package, AlertTriangle, FileText, Plus } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiFetch } from '../../lib/api';
 
 const adjustmentSchema = z.object({
   materialId: z.string().min(1, 'Material is required'),
@@ -38,7 +39,7 @@ export function AdjustmentForm({ onSuccess }) {
   useEffect(() => {
     async function fetchMaterials() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' });
+        const res = await apiFetch('/api/materials');
         if (!res.ok) throw new Error('Failed to fetch materials');
         const result = await res.json();
         setMaterials(Array.isArray(result) ? result : result.data || []);
@@ -59,10 +60,9 @@ export function AdjustmentForm({ onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/adjustments`, {
+      const response = await apiFetch('/api/adjustments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           ...data,
           branchId: user.branchId,

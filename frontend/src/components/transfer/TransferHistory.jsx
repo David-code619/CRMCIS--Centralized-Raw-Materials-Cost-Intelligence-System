@@ -18,6 +18,7 @@ import { StatusBadge } from '../ui/StatusBadge';
 import { DataTable } from '../ui/DataTable';
 import { FilterToolbar } from '../ui/FilterToolbar';
 import { useDataTable } from '../../hooks/useDataTable';
+import { apiFetch } from '../../lib/api';
 
 export function TransferHistory() {
   const { user } = useAuth();
@@ -55,7 +56,7 @@ export function TransferHistory() {
         ...(branchId ? { branchId } : {}),
       });
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/transfers?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch transfers');
       const result = await res.json();
       setData(result);
@@ -73,9 +74,8 @@ export function TransferHistory() {
   const handleComplete = async (id) => {
     setIsProcessing(id);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers/${id}/complete`, {
+      const res = await apiFetch(`/api/transfers/${id}/complete`, {
         method: 'PATCH',
-        credentials: 'include',
       });
       if (!res.ok) {
         const errorData = await res.json();

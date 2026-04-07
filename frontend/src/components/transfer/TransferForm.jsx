@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { Loader2, Package, ArrowRightLeft, FileText, Plus, Building2 } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiFetch } from '../../lib/api';
 
 const transferSchema = z.object({
   fromBranchId: z.string().min(1, 'Source branch is required'),
@@ -45,8 +46,8 @@ export function TransferForm({ onSuccess }) {
     async function fetchData() {
       try {
         const [branchesRes, materialsRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' })
+          apiFetch('/api/branches'),
+          apiFetch('/api/materials')
         ]);
         
         if (!branchesRes.ok || !materialsRes.ok) throw new Error('Failed to fetch data');
@@ -72,10 +73,9 @@ export function TransferForm({ onSuccess }) {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers`, {
+      const response = await apiFetch('/api/transfers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(data),
       });
 

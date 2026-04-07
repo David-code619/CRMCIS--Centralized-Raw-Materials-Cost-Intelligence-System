@@ -14,6 +14,7 @@ import { TrendingUp, TrendingDown, Package, Loader2, Search } from 'lucide-react
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
+import { apiFetch } from '../../lib/api';
 
 export function CostTrends() {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ export function CostTrends() {
   useEffect(() => {
     async function fetchMaterials() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' });
+        const res = await apiFetch('/api/materials');
         if (!res.ok) throw new Error('Failed to fetch materials');
         const result = await res.json();
         const data = Array.isArray(result) ? result : result.data || [];
@@ -49,8 +50,8 @@ export function CostTrends() {
       setIsLoadingTrends(true);
       try {
         const branchId = user?.branchId;
-        const url = `${import.meta.env.VITE_API_URL}/api/reports/cost-trends?materialId=${selectedMaterialId}${branchId ? `&branchId=${branchId}` : ''}`;
-        const res = await fetch(url, { credentials: 'include' });
+        const url = `/api/reports/cost-trends?materialId=${selectedMaterialId}${branchId ? `&branchId=${branchId}` : ''}`;
+        const res = await apiFetch(url);
         if (!res.ok) throw new Error('Failed to fetch trends');
         const data = await res.json();
         setTrendData(data);

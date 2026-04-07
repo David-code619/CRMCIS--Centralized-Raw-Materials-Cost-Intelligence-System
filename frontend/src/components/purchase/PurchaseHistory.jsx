@@ -14,6 +14,7 @@ import { cn } from '../../lib/utils';
 import { DataTable } from '../ui/DataTable';
 import { FilterToolbar } from '../ui/FilterToolbar';
 import { useDataTable } from '../../hooks/useDataTable';
+import { apiFetch } from '../../lib/api';
 
 export function PurchaseHistory() {
   const { user } = useAuth();
@@ -49,7 +50,7 @@ export function PurchaseHistory() {
         ...(branchId ? { branchId } : {}),
       });
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/purchases?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch history');
       const result = await res.json();
       setData(result);

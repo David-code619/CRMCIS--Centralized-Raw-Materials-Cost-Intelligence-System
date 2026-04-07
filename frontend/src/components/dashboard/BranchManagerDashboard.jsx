@@ -26,6 +26,7 @@ import { ChartCard } from '../ui/ChartCard';
 import { Breadcrumbs } from '../ui/Breadcrumbs';
 import { StatusBadge } from '../ui/StatusBadge';
 import { cn } from '../../lib/utils';
+import { apiFetch } from '../../lib/api';
 
 export function BranchManagerDashboard({ stats, onRefresh }) {
   const { theme } = useTheme();
@@ -53,7 +54,7 @@ export function BranchManagerDashboard({ stats, onRefresh }) {
 
   const handleAuditBranch = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/usage/audit-all`, { method: 'POST', credentials: 'include' });
+      const res = await apiFetch('/api/usage/audit-all', { method: 'POST' });
       if (res.ok) {
         onRefresh();
       } else {

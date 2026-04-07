@@ -10,6 +10,7 @@ import { FilterToolbar } from '../components/ui/FilterToolbar';
 import { useDataTable } from '../hooks/useDataTable';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { cn } from '../lib/utils';
+import { apiFetch } from '../lib/api';
 
 export function Users() {
   const { user: currentUser } = useAuth();
@@ -48,7 +49,7 @@ export function Users() {
         isActive: getFilter('isActive'),
       });
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users?${queryParams.toString()}`, { credentials: 'include' });
+      const response = await apiFetch(`/api/users?${queryParams.toString()}`);
       if (response.status === 401) {
         window.location.href = '/login';
         return;
@@ -74,7 +75,7 @@ export function Users() {
   useEffect(() => {
     async function fetchBranches() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' });
+        const response = await apiFetch('/api/branches');
         if (!response.ok) throw new Error('Failed to load branches');
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -94,12 +95,11 @@ export function Users() {
   const handleSaveUser = async (formData) => {
     try {
       const method = editingUser ? 'PATCH' : 'POST';
-      const url = editingUser ? `${import.meta.env.VITE_API_URL}/api/users/${editingUser.id}` : `${import.meta.env.VITE_API_URL}/api/users`;
+      const url = editingUser ? `/api/users/${editingUser.id}` : `/api/users`;
       
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(formData)
       });
 
@@ -118,10 +118,9 @@ export function Users() {
 
   const handleToggleStatus = async (id, isActive) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${id}/toggle-status`, {
+      const response = await apiFetch(`/api/users/${id}/toggle-status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ isActive })
       });
 
@@ -139,9 +138,8 @@ export function Users() {
 
   const handleDeleteUser = async (id) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${id}`, {
+      const response = await apiFetch(`/api/users/${id}`, {
         method: 'DELETE',
-        credentials: 'include'
       });
 
       if (!response.ok) {

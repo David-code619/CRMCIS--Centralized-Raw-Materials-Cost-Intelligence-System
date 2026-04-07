@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { ThemeToggle } from '../ThemeToggle';
 import { Link } from 'react-router-dom';
+import { apiFetch } from '../../lib/api';
 
 export function TopNavbar({ onMenuClick, className }) {
   const { user, logout } = useAuth();
@@ -15,13 +16,13 @@ export function TopNavbar({ onMenuClick, className }) {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications?limit=5`, { credentials: 'include' });
+      const res = await apiFetch('/api/notifications?limit=5');
       if (res.ok) {
         const data = await res.json();
         setNotifications(data);
       }
       
-      const countRes = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/unread-count`, { credentials: 'include' });
+      const countRes = await apiFetch('/api/notifications/unread-count');
       if (countRes.ok) {
         const { count } = await countRes.json();
         setUnreadCount(count);
@@ -44,7 +45,7 @@ export function TopNavbar({ onMenuClick, className }) {
 
   const markRead = async (id) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/${id}/read`, { method: 'PATCH', credentials: 'include' });
+      const res = await apiFetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
       if (res.ok) {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -56,7 +57,7 @@ export function TopNavbar({ onMenuClick, className }) {
 
   const markAllRead = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/read-all`, { method: 'PATCH', credentials: 'include' });
+      const res = await apiFetch('/api/notifications/read-all', { method: 'PATCH' });
       if (res.ok) {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         setUnreadCount(0);
@@ -69,7 +70,7 @@ export function TopNavbar({ onMenuClick, className }) {
   const deleteNotif = async (e, id) => {
     e.stopPropagation();
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await apiFetch(`/api/notifications/${id}`, { method: 'DELETE' });
       if (res.ok) {
         const deleted = notifications.find(n => n.id === id);
         setNotifications(prev => prev.filter(n => n.id !== id));

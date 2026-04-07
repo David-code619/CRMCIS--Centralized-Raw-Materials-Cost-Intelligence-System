@@ -20,6 +20,7 @@ import { useDataTable } from '../hooks/useDataTable';
 import { KPICard } from '../components/ui/KPICard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { useToast } from '../components/ui/Toast';
+import { apiFetch } from '../lib/api';
 
 export function Inventory() {
   const { user } = useAuth();
@@ -59,7 +60,7 @@ export function Inventory() {
       const queryParams = new URLSearchParams();
       if (branchId) queryParams.append('branchId', branchId);
       
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/stats?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/inventory/stats?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch stats');
       const result = await res.json();
       setStats(result);
@@ -73,7 +74,7 @@ export function Inventory() {
   const fetchBranches = useCallback(async () => {
     if (!isSuperAdmin) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' });
+      const res = await apiFetch('/api/branches');
       if (!res.ok) throw new Error('Failed to fetch branches');
       const result = await res.json();
       setBranches(result);
@@ -100,7 +101,7 @@ export function Inventory() {
       const status = getFilter('status');
       if (status) params.append('status', status);
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/inventory?${params.toString()}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/inventory?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch inventory');
       const result = await res.json();
       setInventoryData(result);
@@ -120,7 +121,7 @@ export function Inventory() {
       const queryParams = new URLSearchParams();
       if (branchId) queryParams.append('branchId', branchId);
       
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/history?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/inventory/history?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch history');
       const result = await res.json();
       setHistory(result);

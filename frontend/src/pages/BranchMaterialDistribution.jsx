@@ -21,6 +21,7 @@ import { DataTable } from '../components/ui/DataTable';
 import { FilterToolbar } from '../components/ui/FilterToolbar';
 import { useDataTable } from '../hooks/useDataTable';
 import { Modal } from '../components/ui/Modal';
+import { apiFetch } from '../lib/api';
 
 export function BranchMaterialDistribution() {
   const { user } = useAuth();
@@ -72,7 +73,7 @@ export function BranchMaterialDistribution() {
   const fetchBranches = useCallback(async () => {
     if (!isSuperAdmin) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' });
+      const res = await apiFetch('/api/branches');
       if (!res.ok) throw new Error('Failed to fetch branches');
       const result = await res.json();
       setBranches(result);
@@ -98,10 +99,10 @@ export function BranchMaterialDistribution() {
       });
 
       const url = isSuperAdmin
-        ? `${import.meta.env.VITE_API_URL}/api/branch-materials?${queryParams.toString()}`
-        : `${import.meta.env.VITE_API_URL}/api/branches/${branchId}/materials?${queryParams.toString()}`;
+        ? `/api/branch-materials?${queryParams.toString()}`
+        : `/api/branches/${branchId}/materials?${queryParams.toString()}`;
 
-      const res = await fetch(url, { credentials: 'include' });
+      const res = await apiFetch(url);
       if (!res.ok) throw new Error('Failed to fetch branch materials');
       const result = await res.json();
       setData(result);
@@ -116,7 +117,7 @@ export function BranchMaterialDistribution() {
   const fetchMaterialBreakdown = useCallback(async (materialId) => {
     setIsBreakdownLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/branch-materials/${materialId}/breakdown`, { credentials: 'include' });
+      const res = await apiFetch(`/api/branch-materials/${materialId}/breakdown`);
       if (!res.ok) throw new Error('Failed to fetch breakdown');
       const result = await res.json();
       setBreakdownData(result);
@@ -140,7 +141,7 @@ export function BranchMaterialDistribution() {
 
   const fetchCatalog = useCallback(async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' });
+      const res = await apiFetch('/api/materials');
       if (!res.ok) throw new Error('Failed to fetch catalog');
       const result = await res.json();
       setCatalog(Array.isArray(result) ? result : result.data || []);
@@ -166,10 +167,9 @@ export function BranchMaterialDistribution() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/branches/${user.branchId}/materials/activate`, {
+      const response = await apiFetch(`/api/branches/${user.branchId}/materials/activate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(activationData)
       });
 
@@ -189,10 +189,9 @@ export function BranchMaterialDistribution() {
     if (!editingMaterial) return;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/branch-materials/${editingMaterial.id}`, {
+      const response = await apiFetch(`/api/branch-materials/${editingMaterial.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(editData)
       });
 
@@ -209,10 +208,9 @@ export function BranchMaterialDistribution() {
 
   const toggleStatus = async (bm) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/branch-materials/${bm.id}`, {
+      const response = await apiFetch(`/api/branch-materials/${bm.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ isActive: !bm.isActive })
       });
 

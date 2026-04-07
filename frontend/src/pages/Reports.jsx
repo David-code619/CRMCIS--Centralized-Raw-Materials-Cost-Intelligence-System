@@ -35,6 +35,7 @@ import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { ReportFilters } from '../components/reports/ReportFilters';
 import { KPICard } from '../components/ui/KPICard';
 import { cn } from '../lib/utils';
+import { apiFetch } from '../lib/api';
 
 export function Reports() {
   const { user } = useAuth();
@@ -71,8 +72,8 @@ export function Reports() {
     async function fetchStaticData() {
       try {
         const [bRes, mRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' })
+          apiFetch('/api/branches'),
+          apiFetch('/api/materials')
         ]);
         
         if (bRes.status === 401 || mRes.status === 401) {
@@ -106,10 +107,10 @@ export function Reports() {
       try {
         const query = new URLSearchParams(filters).toString();
         const [kpiRes, trendRes, topRes, compRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/reports/kpis?${query}`, { credentials: 'include' }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/reports/value-trend?${query}`, { credentials: 'include' }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/reports/top-consumed?${query}`, { credentials: 'include' }),
-          isSuperAdmin ? fetch(`${import.meta.env.VITE_API_URL}/api/reports/branch-comparison?${query}`, { credentials: 'include' }) : Promise.resolve(null)
+          apiFetch(`/api/reports/kpis?${query}`),
+          apiFetch(`/api/reports/value-trend?${query}`),
+          apiFetch(`/api/reports/top-consumed?${query}`),
+          isSuperAdmin ? apiFetch(`/api/reports/branch-comparison?${query}`) : Promise.resolve(null)
         ]);
 
         if (kpiRes.status === 401 || trendRes.status === 401 || topRes.status === 401 || (compRes && compRes.status === 401)) {

@@ -23,6 +23,7 @@ import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
 import { KPICard } from '../ui/KPICard';
+import { apiFetch } from '../../lib/api';
 
 export function ShrinkageSummary() {
   const { user } = useAuth();
@@ -36,8 +37,10 @@ export function ShrinkageSummary() {
         const branchId = user?.branchId;
         if (!branchId && user?.role !== 'SUPER_ADMIN') return;
 
-        const url = branchId ? `${import.meta.env.VITE_API_URL}/api/reports/shrinkage?branchId=${branchId}` : `${import.meta.env.VITE_API_URL}/api/reports/shrinkage`;
-        const res = await fetch(url, { credentials: 'include' });
+        const url = branchId
+          ? `/api/reports/shrinkage?branchId=${branchId}`
+          : `/api/reports/shrinkage`;
+        const res = await apiFetch(url);
         if (!res.ok) throw new Error('Failed to fetch shrinkage metrics');
         const data = await res.json();
         setMetrics(data);

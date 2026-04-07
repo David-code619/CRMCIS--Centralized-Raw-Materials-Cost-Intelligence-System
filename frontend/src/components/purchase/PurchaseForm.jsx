@@ -6,6 +6,7 @@ import { Loader2, Package, DollarSign, User, FileText, Calendar } from 'lucide-r
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
+import { apiFetch } from '../../lib/api';
 
 const purchaseSchema = z.object({
   materialId: z.string().min(1, 'Material is required'),
@@ -51,8 +52,8 @@ export function PurchaseForm({ onSuccess }) {
     async function fetchData() {
       try {
         const [matRes, branchRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/materials`, { credentials: 'include' }),
-          user?.role === 'SUPER_ADMIN' ? fetch(`${import.meta.env.VITE_API_URL}/api/branches`, { credentials: 'include' }) : Promise.resolve(null)
+          apiFetch('/api/materials'),
+          user?.role === 'SUPER_ADMIN' ? apiFetch('/api/branches') : Promise.resolve(null)
         ]);
 
         if (!matRes.ok) throw new Error('Failed to fetch materials');
@@ -83,10 +84,9 @@ export function PurchaseForm({ onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
+      const response = await apiFetch('/api/purchases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           ...data,
           branchId,

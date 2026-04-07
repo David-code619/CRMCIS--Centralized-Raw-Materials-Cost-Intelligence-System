@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { Loader2, Package, Activity, Plus } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiFetch } from '../../lib/api';
 
 const usageSchema = z.object({
   materialId: z.string().min(1, 'Material is required'),
@@ -33,7 +34,7 @@ export function UsageForm({ onSuccess }) {
   useEffect(() => {
     async function fetchMaterials() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/inventory`, { credentials: 'include' });
+        const res = await apiFetch('/api/inventory');
         if (!res.ok) throw new Error('Failed to fetch inventory');
         const result = await res.json();
         const data = Array.isArray(result) ? result : result.data || [];
@@ -62,10 +63,9 @@ export function UsageForm({ onSuccess }) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/usage`, {
+      const response = await apiFetch('/api/usage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           ...data,
           branchId: user.branchId,

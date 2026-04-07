@@ -18,6 +18,7 @@ import { cn } from '../../lib/utils';
 import { DataTable } from '../ui/DataTable';
 import { FilterToolbar } from '../ui/FilterToolbar';
 import { useDataTable } from '../../hooks/useDataTable';
+import { apiFetch } from '../../lib/api';
 
 export function TransferApprovalQueue() {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ export function TransferApprovalQueue() {
         status: 'REQUESTED',
       });
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers?${queryParams.toString()}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/transfers?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch requests');
       const result = await res.json();
       setData(result);
@@ -70,10 +71,9 @@ export function TransferApprovalQueue() {
   const handleAction = async (id, action) => {
     setIsProcessing(id);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transfers/${id}/${action}`, {
+      const res = await apiFetch(`/api/transfers/${id}/${action}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ notes: approvalNotes[id] || '' }),
       });
       
