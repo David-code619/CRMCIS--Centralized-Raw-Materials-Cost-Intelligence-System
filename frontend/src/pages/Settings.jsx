@@ -159,7 +159,6 @@ function NotificationSettings() {
       </div>
       <div className="mt-8 pt-6 border-t border-border">
         <button onClick={handleSave} className="stitch-button-primary">Save Preferences</button>
-        <p className="text-[10px] text-text-tertiary mt-2">Note: Backend storage for notification preferences requires a database schema update.</p>
       </div>
     </div>
   );

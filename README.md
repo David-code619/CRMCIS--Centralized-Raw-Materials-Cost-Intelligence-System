@@ -16,7 +16,7 @@ A comprehensive inventory management system for raw materials with multi-branch 
 
 ## Tech Stack
 ### Frontend
-- React 18 with Vite
+- React 19 with Vite
 - Tailwind CSS for styling
 - React Router for navigation
 - Context API for state management
