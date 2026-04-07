@@ -15,7 +15,8 @@ export function ReportFilters({
   branches, 
   materials, 
   categories,
-  isSuperAdmin 
+  isSuperAdmin,
+  onExportClick
 }) {
   
   const handleChange = (field, value) => {
@@ -98,7 +99,7 @@ export function ReportFilters({
           >
             <X className="w-4 h-4" />
           </button>
-          <button className="stitch-button-secondary flex items-center gap-2 py-2">
+          <button onClick={onExportClick} className="stitch-button-secondary flex items-center gap-2 py-2">
             <Download className="w-4 h-4" />
             Export CSV
           </button>

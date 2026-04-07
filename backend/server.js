@@ -110,6 +110,37 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+const getCookieMode = (req) => {
+  const isSecureRequest =
+    req.secure ||
+    req.headers["x-forwarded-proto"] === "https" ||
+    process.env.NODE_ENV === "production";
+  return {
+    secure: isSecureRequest,
+    sameSite: isSecureRequest ? "none" : "lax",
+  };
+};
+
+const clearAuthCookie = (req, res) => {
+  const mode = getCookieMode(req);
+
+  // Clear using the mode for this request.
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: mode.secure,
+    sameSite: mode.sameSite,
+    path: "/",
+  });
+
+  // Also clear the other common mode to avoid mismatches across deployments/config changes.
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: !mode.secure,
+    sameSite: mode.sameSite === "none" ? "lax" : "none",
+    path: "/",
+  });
+};
+
 // --- PRISMA TIMEOUT HELPER ---
 const withTimeout = (promise, timeoutMs = 10000) => {
   return Promise.race([
@@ -152,12 +183,7 @@ const authenticate = async (req, res, next) => {
 
     if (!user) {
       console.log(`[AUTH] User ${decoded.id} not found in DB, clearing cookie`);
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-      });
+      clearAuthCookie(req, res);
       return res
         .status(401)
         .json({ error: "User no longer exists. Please log in again." });
@@ -181,12 +207,7 @@ const authenticate = async (req, res, next) => {
     );
     // Only clear cookie-based sessions. If client uses Bearer tokens, don't touch cookies.
     if (!bearerToken) {
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-      });
+      clearAuthCookie(req, res);
     }
     res
       .status(401)
@@ -258,14 +279,13 @@ app.post("/api/auth/login", async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    const isSecureRequest =
-      req.secure || req.headers["x-forwarded-proto"] === "https" || isProd;
+    const { secure: isSecureRequest, sameSite } = getCookieMode(req);
     res.cookie("token", token, {
       httpOnly: true,
       // Cross-site cookies require: SameSite=None; Secure
       secure: isSecureRequest,
       path: "/",
-      sameSite: isSecureRequest ? "none" : "lax",
+      sameSite,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
@@ -284,12 +304,7 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    path: "/",
-  });
+  clearAuthCookie(req, res);
   res.json({ message: "Logged out" });
 });
 

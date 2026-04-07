@@ -260,6 +260,21 @@ export function Inventory() {
     }
   ];
 
+  const exportColumns = [
+    { header: 'Material', accessor: (item) => item.material?.name || '' },
+    { header: 'SKU', accessor: (item) => item.material?.sku || '' },
+    { header: 'Category', accessor: (item) => item.material?.category || '' },
+    ...(isSuperAdmin
+      ? [{ header: 'Branch', accessor: (item) => item.branch?.name || '' }]
+      : []),
+    { header: 'Current Stock', accessor: (item) => item.currentStock ?? '' },
+    { header: 'Unit', accessor: (item) => item.material?.unit || '' },
+    { header: 'Reorder Threshold', accessor: (item) => item.reorderThreshold ?? '' },
+    { header: 'Avg Cost', accessor: (item) => item.avgCost ?? '' },
+    { header: 'Total Value', accessor: (item) => (item.currentStock ?? 0) * (item.avgCost ?? 0) },
+    { header: 'Last Updated', accessor: (item) => (item.updatedAt ? new Date(item.updatedAt).toISOString() : '') },
+  ];
+
   const historyColumns = [
     {
       header: 'Date',
@@ -411,7 +426,7 @@ export function Inventory() {
                 searchValue={search}
                 onSearchChange={setSearch}
                 searchPlaceholder="Search by material name, SKU..."
-                onExportClick={() => exportToCSV(inventoryData?.data || [], 'inventory', columns)}
+                onExportClick={() => exportToCSV(inventoryData?.data || [], 'inventory', exportColumns)}
               >
                 <div className="flex flex-wrap items-center gap-3">
                   {isSuperAdmin && (
