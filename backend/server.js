@@ -69,13 +69,13 @@ import {
   deleteNotification 
 } from "./lib/notificationService.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "crmcis-secret-key-2024";
+const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 3000;
 
 const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true
   }));
 app.use(express.json());
