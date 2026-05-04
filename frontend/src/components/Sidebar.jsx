@@ -42,7 +42,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, className }) {
   return (
     <aside className={cn(
       'flex flex-col bg-surface border-r border-border transition-all duration-300 ease-in-out z-30',
-      isCollapsed ? 'w-20' : 'w-72',
+      isCollapsed ? 'w-20' : 'w-64',
       className
     )}>
       {/* Logo Area */}

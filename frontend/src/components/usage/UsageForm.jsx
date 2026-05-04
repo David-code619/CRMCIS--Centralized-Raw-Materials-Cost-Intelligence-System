@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Loader2, Package, Activity, Plus } from 'lucide-react';
-import { useToast } from '../ui/Toast';
-import { useAuth } from '../../contexts/AuthContext';
-import { apiFetch } from '../../lib/api';
+import { useState, useEffect, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Loader2, Package, Activity, Plus } from "lucide-react";
+import { useToast } from "../ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
+import { apiFetch } from "../../lib/api";
 
 const usageSchema = z.object({
-  materialId: z.string().min(1, 'Material is required'),
-  quantityUsed: z.number().positive('Quantity must be positive'),
+  materialId: z.string().min(1, "Material is required"),
+  quantityUsed: z.number().positive("Quantity must be positive"),
 });
 
 export function UsageForm({ onSuccess }) {
@@ -29,43 +29,43 @@ export function UsageForm({ onSuccess }) {
     resolver: zodResolver(usageSchema),
   });
 
-  const selectedMaterialId = watch('materialId');
+  const selectedMaterialId = watch("materialId");
 
-  useEffect(() => {
-    async function fetchMaterials() {
-      try {
-        const res = await apiFetch('/api/inventory');
-        if (!res.ok) throw new Error('Failed to fetch inventory');
-        const result = await res.json();
-        const data = Array.isArray(result) ? result : result.data || [];
-        // Extract material info from branchMaterial records
-        const formatted = data.map((bm) => ({
-          id: bm.materialId,
-          name: bm.material.name,
-          unit: bm.material.unit,
-          currentStock: bm.currentStock
-        }));
-        setMaterials(formatted);
-      } catch (error) {
-        addToast('Failed to load inventory', 'error');
-      } finally {
-        setIsLoadingMaterials(false);
-      }
+  const fetchMaterials = useCallback(async () => {
+    try {
+      const res = await apiFetch("/api/inventory");
+      if (!res.ok) throw new Error("Failed to fetch inventory");
+      const result = await res.json();
+      const data = Array.isArray(result) ? result : result.data || [];
+      // Extract material info from branchMaterial records
+      const formatted = data.map((bm) => ({
+        id: bm.materialId,
+        name: bm.material.name,
+        unit: bm.material.unit,
+        currentStock: bm.currentStock,
+      }));
+      setMaterials(formatted);
+    } catch (error) {
+      addToast("Failed to load inventory", "error");
+    } finally {
+      setIsLoadingMaterials(false);
     }
+  }, [addToast]);
+  useEffect(() => {
     if (user) fetchMaterials();
-  }, [user, addToast]);
+  }, [user, fetchMaterials]);
 
   const onSubmit = async (data) => {
     if (!user?.branchId) {
-      addToast('User branch not found', 'error');
+      addToast("User branch not found", "error");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const response = await apiFetch('/api/usage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await apiFetch("/api/usage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           branchId: user.branchId,
@@ -74,20 +74,24 @@ export function UsageForm({ onSuccess }) {
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.error || 'Failed to log usage');
+        throw new Error(err.error || "Failed to log usage");
       }
 
-      addToast('Usage logged successfully', 'success');
+      addToast("Usage logged successfully", "success");
       reset();
+
+      // Refresh the material list to show updated stock levels
+      await fetchMaterials();
+
       if (onSuccess) onSuccess();
     } catch (error) {
-      addToast(error.message, 'error');
+      addToast(error.message, "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedMaterial = materials.find(m => m.id === selectedMaterialId);
+  const selectedMaterial = materials.find((m) => m.id === selectedMaterialId);
 
   return (
     <div className="stitch-card p-6">
@@ -102,7 +106,7 @@ export function UsageForm({ onSuccess }) {
             <Package className="w-3 h-3" /> Material
           </label>
           <select
-            {...register('materialId')}
+            {...register("materialId")}
             className="stitch-input w-full"
             disabled={isLoadingMaterials}
           >
@@ -114,7 +118,9 @@ export function UsageForm({ onSuccess }) {
             ))}
           </select>
           {errors.materialId && (
-            <p className="text-[10px] text-danger font-medium">{errors.materialId.message}</p>
+            <p className="text-[10px] text-danger font-medium">
+              {errors.materialId.message}
+            </p>
           )}
         </div>
 
@@ -125,12 +131,14 @@ export function UsageForm({ onSuccess }) {
           <input
             type="number"
             step="any"
-            {...register('quantityUsed', { valueAsNumber: true })}
+            {...register("quantityUsed", { valueAsNumber: true })}
             className="stitch-input w-full"
             placeholder="e.g. 5.5"
           />
           {errors.quantityUsed && (
-            <p className="text-[10px] text-danger font-medium">{errors.quantityUsed.message}</p>
+            <p className="text-[10px] text-danger font-medium">
+              {errors.quantityUsed.message}
+            </p>
           )}
         </div>
 
