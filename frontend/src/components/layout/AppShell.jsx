@@ -56,12 +56,12 @@ export function AppShell({ children }) {
 
       <div className={cn(
         "flex-1 flex flex-col min-w-0 transition-all duration-300",
-        isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72"
+        isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
       )}>
         <TopNavbar onMenuClick={() => setIsMobileMenuOpen(true)} />
         
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-3 md:p-4 overflow-y-auto">
+          <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </main>

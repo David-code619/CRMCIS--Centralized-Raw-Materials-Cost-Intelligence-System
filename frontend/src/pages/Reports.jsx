@@ -142,7 +142,7 @@ export function Reports() {
   }, [filters, isSuperAdmin, addToast]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="w-full mx-auto space-y-8 pb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <Breadcrumbs items={[{ label: 'Intelligence Reports' }]} />
@@ -206,7 +206,7 @@ export function Reports() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Value Trend Chart */}
-            <div className="lg:col-span-2 stitch-card p-6">
+            <div className="lg:col-span-2 stitch-card p-4 md:p-6">
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="font-bold text-text-primary tracking-tight flex items-center gap-2">
@@ -275,7 +275,7 @@ export function Reports() {
             </div>
 
             {/* Top Consumed Materials */}
-            <div className="stitch-card p-6">
+            <div className="stitch-card p-4 md:p-6">
               <div className="mb-8">
                 <h3 className="font-bold text-text-primary tracking-tight flex items-center gap-2">
                   <PieChart className="w-5 h-5 text-primary" />
@@ -329,7 +329,7 @@ export function Reports() {
           {isSuperAdmin && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Branch Comparison */}
-              <div className="stitch-card p-6">
+              <div className="stitch-card p-4 md:p-6">
                 <div className="mb-8">
                   <h3 className="font-bold text-text-primary tracking-tight flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-primary" />
@@ -440,8 +440,8 @@ export function Reports() {
           )}
 
           {/* Trend Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="stitch-card p-6 border-l-4 border-l-primary">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6">
+            <div className="stitch-card p-4 border-l-4 border-l-primary">
               <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary mb-2">Cost Increase Trend</h4>
               <div className="flex items-center justify-between">
                 <p className="text-xl font-bold text-text-primary">
@@ -456,7 +456,7 @@ export function Reports() {
               </div>
               <p className="text-[10px] text-text-tertiary mt-2 font-medium">Average unit cost vs. previous period</p>
             </div>
-            <div className="stitch-card p-6 border-l-4 border-l-success">
+            <div className="stitch-card p-4 border-l-4 border-l-success">
               <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary mb-2">Waste Reduction</h4>
               <div className="flex items-center justify-between">
                 <p className="text-xl font-bold text-text-primary">
@@ -471,7 +471,7 @@ export function Reports() {
               </div>
               <p className="text-[10px] text-text-tertiary mt-2 font-medium">Total waste quantity vs. previous period</p>
             </div>
-            <div className="stitch-card p-6 border-l-4 border-l-warning">
+            <div className="stitch-card p-4 border-l-4 border-l-warning">
               <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary mb-2">Highest Variance Category</h4>
               <div className="flex items-center justify-between">
                 <p className="text-xl font-bold text-text-primary">{kpis?.highestVarianceCategory || 'N/A'}</p>

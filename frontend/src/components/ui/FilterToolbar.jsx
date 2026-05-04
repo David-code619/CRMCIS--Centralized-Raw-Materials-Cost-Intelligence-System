@@ -36,7 +36,7 @@ export function FilterToolbar({
   };
 
   return (
-    <div className={cn('flex flex-col md:flex-row gap-4 justify-between items-center mb-6', className)}>
+    <div className={cn('flex flex-col md:flex-row gap-4 justify-between items-center mb-4', className)}>
       <div className="relative w-full md:w-96">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
         <input

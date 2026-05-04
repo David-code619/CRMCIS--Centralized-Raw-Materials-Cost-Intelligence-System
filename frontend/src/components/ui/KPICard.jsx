@@ -25,7 +25,7 @@ export function KPICard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'stitch-card stitch-card-hover p-5 flex flex-col justify-between min-h-30',
+        'stitch-card stitch-card-hover p-4 flex flex-col justify-between min-h-30',
         className
       )}
     >

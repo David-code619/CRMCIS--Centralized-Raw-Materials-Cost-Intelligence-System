@@ -93,7 +93,7 @@ export function TopNavbar({ onMenuClick, className }) {
 
   return (
     <header className={cn(
-      'h-16 bg-surface border-b border-border px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm',
+      'h-16 bg-surface border-b border-border px-3 md:px-4 flex items-center justify-between sticky top-0 z-30 shadow-sm',
       className
     )}>
       <div className="flex items-center gap-4">

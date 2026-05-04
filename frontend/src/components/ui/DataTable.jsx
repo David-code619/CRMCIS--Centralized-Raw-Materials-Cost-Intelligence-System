@@ -59,7 +59,7 @@ export function DataTable({
                   </div>
                 </th>
               ))}
-              <th className="px-6 py-4 text-right w-10"></th>
+              <th className="px-4 py-4 text-right w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -67,11 +67,11 @@ export function DataTable({
               Array.from({ length: 5 }).map((_, idx) => (
                 <tr key={idx} className="animate-pulse">
                   {columns.map((_, cIdx) => (
-                    <td key={cIdx} className="px-6 py-4">
+                    <td key={cIdx} className="px-4 py-4">
                       <div className="h-4 bg-border rounded w-full" />
                     </td>
                   ))}
-                  <td className="px-6 py-4"></td>
+                  <td className="px-4 py-4"></td>
                 </tr>
               ))
             ) : data.length === 0 ? (
@@ -102,14 +102,14 @@ export function DataTable({
                   {columns.map((col, cIdx) => (
                     <td
                       key={col.accessor || col.header || cIdx}
-                      className={cn('px-6 py-4 text-sm text-text-primary', col.className)}
+                      className={cn('px-4 py-4 text-sm text-text-primary', col.className)}
                     >
                       {typeof col.accessor === 'function'
                         ? col.accessor(item)
                         : item[col.accessor]}
                     </td>
                   ))}
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-4 py-4 text-right">
                     <button className="p-1.5 hover:bg-border rounded-full transition-colors opacity-0 group-hover:opacity-100">
                       <MoreHorizontal className="w-4 h-4 text-text-tertiary" />
                     </button>
