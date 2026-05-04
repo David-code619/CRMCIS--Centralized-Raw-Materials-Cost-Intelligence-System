@@ -16,7 +16,7 @@ const getCookieMode = (req) => {
 };
 
 
-const clearAuthCookie = (req, res) => {
+export const clearAuthCookie = (req, res) => {
   const mode = getCookieMode(req);
 
   // Clear using the mode for this request.
@@ -83,11 +83,11 @@ export const login = async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    const { secure: isSecureRequest, sameSite } = getCookieMode(req);
+    const { secure: cookieSecure, sameSite: cookieSameSite } = getCookieMode(req);
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
       path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
@@ -118,5 +118,38 @@ export const getMe = async (req, res) => {
     res.json(userWithoutPassword);
   } catch (_error) {
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  try {
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "New passwords do not match" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid current password" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { password: hashedPassword },
+    });
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Failed to update password" });
   }
 };
