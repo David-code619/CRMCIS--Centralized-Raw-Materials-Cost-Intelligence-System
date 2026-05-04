@@ -1,21 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Loader2, Package, DollarSign, User, FileText, Calendar } from 'lucide-react';
-import { useToast } from '../ui/Toast';
-import { useAuth } from '../../contexts/AuthContext';
-import { cn } from '../../lib/utils';
-import { apiFetch } from '../../lib/api';
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Loader2,
+  Package,
+  DollarSign,
+  User,
+  FileText,
+  Calendar,
+  Plus,
+} from "lucide-react";
+import { useToast } from "../ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
+import { cn } from "../../lib/utils";
+import { apiFetch } from "../../lib/api";
 
 const purchaseSchema = z.object({
-  materialId: z.string().min(1, 'Material is required'),
-  quantity: z.number().positive('Quantity must be positive'),
-  unitPrice: z.number().min(0, 'Unit price cannot be negative'),
+  materialId: z.string().min(1, "Material is required"),
+  quantity: z.number().positive("Quantity must be positive"),
+  unitPrice: z.number().min(0, "Unit price cannot be negative"),
   supplier: z.string().optional(),
   invoiceRef: z.string().optional(),
   purchaseDate: z.string().optional(),
   branchId: z.string().optional(),
+  receiptUrl: z.string().optional(),
 });
 
 export function PurchaseForm({ onSuccess }) {
@@ -37,36 +46,40 @@ export function PurchaseForm({ onSuccess }) {
   } = useForm({
     resolver: zodResolver(purchaseSchema),
     defaultValues: {
-      purchaseDate: new Date().toISOString().split('T')[0],
-      branchId: user?.branchId || '',
+      purchaseDate: new Date().toISOString().split("T")[0],
+      branchId: user?.branchId || "",
     },
   });
 
-  const selectedMaterialId = watch('materialId');
-  const selectedBranchId = watch('branchId');
-  const quantity = watch('quantity') || 0;
-  const unitPrice = watch('unitPrice') || 0;
+  const selectedMaterialId = watch("materialId");
+  const selectedBranchId = watch("branchId");
+  const quantity = watch("quantity") || 0;
+  const unitPrice = watch("unitPrice") || 0;
   const totalCost = quantity * unitPrice;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const [matRes, branchRes] = await Promise.all([
-          apiFetch('/api/materials'),
-          user?.role === 'SUPER_ADMIN' ? apiFetch('/api/branches') : Promise.resolve(null)
+          apiFetch("/api/materials"),
+          user?.role === "SUPER_ADMIN"
+            ? apiFetch("/api/branches")
+            : Promise.resolve(null),
         ]);
 
-        if (!matRes.ok) throw new Error('Failed to fetch materials');
+        if (!matRes.ok) throw new Error("Failed to fetch materials");
         const matResult = await matRes.json();
-        setMaterials(Array.isArray(matResult) ? matResult : matResult.data || []);
+        setMaterials(
+          Array.isArray(matResult) ? matResult : matResult.data || [],
+        );
 
         if (branchRes) {
-          if (!branchRes.ok) throw new Error('Failed to fetch branches');
+          if (!branchRes.ok) throw new Error("Failed to fetch branches");
           const branchResult = await branchRes.json();
           setBranches(branchResult);
         }
       } catch (error) {
-        addToast('Failed to load data', 'error');
+        addToast("Failed to load data", "error");
       } finally {
         setIsLoadingMaterials(false);
       }
@@ -75,18 +88,19 @@ export function PurchaseForm({ onSuccess }) {
   }, [addToast, user?.role]);
 
   const onSubmit = async (data) => {
-    const branchId = user?.role === 'SUPER_ADMIN' ? data.branchId : user?.branchId;
-    
+    const branchId =
+      user?.role === "SUPER_ADMIN" ? data.branchId : user?.branchId;
+
     if (!branchId) {
-      addToast('Branch is required', 'error');
+      addToast("Branch is required", "error");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const response = await apiFetch('/api/purchases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await apiFetch("/api/purchases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           branchId,
@@ -95,17 +109,18 @@ export function PurchaseForm({ onSuccess }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to log purchase');
+        throw new Error(errorData.error || "Failed to log purchase");
       }
 
-      addToast('Purchase logged successfully', 'success');
+      addToast("Purchase logged successfully", "success");
       reset({
-        purchaseDate: new Date().toISOString().split('T')[0],
-        branchId: user?.branchId || '',
+        purchaseDate: new Date().toISOString().split("T")[0],
+        branchId: user?.branchId || "",
+        receiptUrl: "",
       });
       if (onSuccess) onSuccess();
     } catch (error) {
-      addToast(error.message, 'error');
+      addToast(error.message, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -123,15 +138,12 @@ export function PurchaseForm({ onSuccess }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Branch Selection (Super Admin only) */}
-          {user?.role === 'SUPER_ADMIN' && (
+          {user?.role === "SUPER_ADMIN" && (
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary flex items-center gap-1">
                 Branch
               </label>
-              <select
-                {...register('branchId')}
-                className="stitch-input w-full"
-              >
+              <select {...register("branchId")} className="stitch-input w-full">
                 <option value="">Select Branch</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -140,18 +152,25 @@ export function PurchaseForm({ onSuccess }) {
                 ))}
               </select>
               {errors.branchId && (
-                <p className="text-[10px] text-danger font-medium">{errors.branchId.message}</p>
+                <p className="text-[10px] text-danger font-medium">
+                  {errors.branchId.message}
+                </p>
               )}
             </div>
           )}
 
           {/* Material Selection */}
-          <div className={cn("space-y-1.5", user?.role !== 'SUPER_ADMIN' && "md:col-span-2")}>
+          <div
+            className={cn(
+              "space-y-1.5",
+              user?.role !== "SUPER_ADMIN" && "md:col-span-2",
+            )}
+          >
             <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary flex items-center gap-1">
               <Package className="w-3 h-3" /> Material
             </label>
             <select
-              {...register('materialId')}
+              {...register("materialId")}
               className="stitch-input w-full"
               disabled={isLoadingMaterials}
             >
@@ -163,7 +182,9 @@ export function PurchaseForm({ onSuccess }) {
               ))}
             </select>
             {errors.materialId && (
-              <p className="text-[10px] text-danger font-medium">{errors.materialId.message}</p>
+              <p className="text-[10px] text-danger font-medium">
+                {errors.materialId.message}
+              </p>
             )}
           </div>
 
@@ -174,7 +195,7 @@ export function PurchaseForm({ onSuccess }) {
             </label>
             <input
               type="date"
-              {...register('purchaseDate')}
+              {...register("purchaseDate")}
               className="stitch-input w-full"
             />
           </div>
@@ -189,12 +210,14 @@ export function PurchaseForm({ onSuccess }) {
             <input
               type="number"
               step="any"
-              {...register('quantity', { valueAsNumber: true })}
+              {...register("quantity", { valueAsNumber: true })}
               className="stitch-input w-full"
               placeholder="0.00"
             />
             {errors.quantity && (
-              <p className="text-[10px] text-danger font-medium">{errors.quantity.message}</p>
+              <p className="text-[10px] text-danger font-medium">
+                {errors.quantity.message}
+              </p>
             )}
           </div>
 
@@ -206,12 +229,14 @@ export function PurchaseForm({ onSuccess }) {
             <input
               type="number"
               step="any"
-              {...register('unitPrice', { valueAsNumber: true })}
+              {...register("unitPrice", { valueAsNumber: true })}
               className="stitch-input w-full"
               placeholder="0.00"
             />
             {errors.unitPrice && (
-              <p className="text-[10px] text-danger font-medium">{errors.unitPrice.message}</p>
+              <p className="text-[10px] text-danger font-medium">
+                {errors.unitPrice.message}
+              </p>
             )}
           </div>
 
@@ -221,7 +246,10 @@ export function PurchaseForm({ onSuccess }) {
               Total Cost
             </label>
             <div className="stitch-input w-full bg-background/50 font-bold text-primary flex items-center">
-              ₦ {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              ₦{" "}
+              {totalCost.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
             </div>
           </div>
         </div>
@@ -234,7 +262,7 @@ export function PurchaseForm({ onSuccess }) {
             </label>
             <input
               type="text"
-              {...register('supplier')}
+              {...register("supplier")}
               className="stitch-input w-full"
               placeholder="e.g. Fresh Farms Ltd"
             />
@@ -247,11 +275,53 @@ export function PurchaseForm({ onSuccess }) {
             </label>
             <input
               type="text"
-              {...register('invoiceRef')}
+              {...register("invoiceRef")}
               className="stitch-input w-full"
               placeholder="e.g. INV-2026-001"
             />
           </div>
+        </div>
+
+        {/* Receipt Upload */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary flex items-center gap-1">
+            <FileText className="w-3 h-3" /> Proof of Transaction (Receipt)
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // Simulate upload by converting to base64
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setValue("receiptUrl", reader.result);
+                    addToast(`Proof uploaded: ${file.name}`, "info");
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="hidden"
+              id="receipt-upload"
+            />
+            <label
+              htmlFor="receipt-upload"
+              className="stitch-button-secondary py-2 px-4 cursor-pointer flex items-center gap-2 text-xs"
+            >
+              <Plus className="w-3 h-3" />
+              Upload Receipt
+            </label>
+            {watch("receiptUrl") && (
+              <span className="text-[10px] text-primary font-bold animate-pulse flex items-center gap-1">
+                ✓ Receipt Attached
+              </span>
+            )}
+          </div>
+          <p className="text-[10px] text-text-tertiary">
+            Upload a clear image or PDF of the physical receipt for auditing.
+          </p>
         </div>
 
         <div className="pt-4">
@@ -266,7 +336,7 @@ export function PurchaseForm({ onSuccess }) {
                 Logging Purchase...
               </>
             ) : (
-              'Log Purchase'
+              "Log Purchase"
             )}
           </button>
         </div>

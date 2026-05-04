@@ -24,7 +24,7 @@ import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.
  * 6. Creates a permanent record of the purchase for auditing and reporting.
  */
 export async function logPurchase(data) {
-  const { branchId, materialId, quantity, unitPrice, supplier, invoiceRef, purchaseDate, loggedById } = data;
+  const { branchId, materialId, quantity, unitPrice, supplier, invoiceRef, purchaseDate, loggedById, receiptUrl  } = data;
 
   if (quantity <= 0 || unitPrice < 0) {
     throw new Error('Quantity must be positive and unit price cannot be negative.');
@@ -87,7 +87,8 @@ export async function logPurchase(data) {
         supplier,
         invoiceRef,
         purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
-        loggedById
+        loggedById,
+        receiptUrl
       },
       include: {
         material: true,

@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Package, 
-  Calendar, 
-  User, 
-  FileText, 
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Package,
+  Calendar,
+  User,
+  FileText,
   Loader2,
   Search,
-  Filter
-} from 'lucide-react';
-import { useToast } from '../ui/Toast';
-import { useAuth } from '../../contexts/AuthContext';
-import { cn } from '../../lib/utils';
-import { DataTable } from '../ui/DataTable';
-import { FilterToolbar } from '../ui/FilterToolbar';
-import { useDataTable } from '../../hooks/useDataTable';
-import { apiFetch } from '../../lib/api';
+  Filter,
+} from "lucide-react";
+import { useToast } from "../ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
+import { cn } from "../../lib/utils";
+import { DataTable } from "../ui/DataTable";
+import { FilterToolbar } from "../ui/FilterToolbar";
+import { useDataTable } from "../../hooks/useDataTable";
+import { apiFetch } from "../../lib/api";
 
 export function PurchaseHistory() {
   const { user } = useAuth();
   const { addToast } = useToast();
-  
+
   const {
     page,
     limit,
@@ -32,7 +32,7 @@ export function PurchaseHistory() {
     setSort,
     setFilter,
     getFilter,
-  } = useDataTable({ defaultSortBy: 'purchaseDate', defaultSortOrder: 'desc' });
+  } = useDataTable({ defaultSortBy: "purchaseDate", defaultSortOrder: "desc" });
 
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,11 +51,11 @@ export function PurchaseHistory() {
       });
 
       const res = await apiFetch(`/api/purchases?${queryParams.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch history');
+      if (!res.ok) throw new Error("Failed to fetch history");
       const result = await res.json();
       setData(result);
     } catch (error) {
-      addToast('Failed to load purchase history', 'error');
+      addToast("Failed to load purchase history", "error");
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +67,7 @@ export function PurchaseHistory() {
 
   const columns = [
     {
-      header: 'Date',
+      header: "Date",
       accessor: (p) => (
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-text-tertiary" />
@@ -77,69 +77,101 @@ export function PurchaseHistory() {
         </div>
       ),
       sortable: true,
-      sortKey: 'purchaseDate',
+      sortKey: "purchaseDate",
     },
     {
-      header: 'Material',
+      header: "Material",
       accessor: (p) => (
-        <p className="font-bold text-text-primary tracking-tight">{p.material?.name}</p>
+        <p className="font-bold text-text-primary tracking-tight">
+          {p.material?.name}
+        </p>
       ),
       sortable: true,
-      sortKey: 'materialId',
+      sortKey: "materialId",
     },
     {
-      header: 'Quantity',
+      header: "Quantity",
       accessor: (p) => (
         <span className="text-sm font-medium text-text-secondary">
           {p.quantity} {p.material?.unit}
         </span>
       ),
       sortable: true,
-      sortKey: 'quantity',
+      sortKey: "quantity",
     },
     {
-      header: 'Unit Price',
+      header: "Unit Price",
       accessor: (p) => (
         <span className="text-sm font-medium text-text-secondary">
-          ₦ {p.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          ₦{" "}
+          {p.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
       sortable: true,
-      sortKey: 'unitPrice',
+      sortKey: "unitPrice",
     },
     {
-      header: 'Total',
+      header: "Total",
       accessor: (p) => (
         <span className="text-sm font-bold text-primary">
-          ₦ {p.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          ₦{" "}
+          {p.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
       sortable: true,
-      sortKey: 'totalCost',
+      sortKey: "totalCost",
     },
     {
-      header: 'Supplier / Ref',
+      header: "Supplier / Ref",
       accessor: (p) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-text-primary">{p.supplier || 'N/A'}</span>
-          <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">{p.invoiceRef || 'No Ref'}</span>
+          <span className="text-sm font-medium text-text-primary">
+            {p.supplier || "N/A"}
+          </span>
+          <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">
+            {p.invoiceRef || "No Ref"}
+          </span>
         </div>
       ),
       sortable: true,
-      sortKey: 'supplier',
+      sortKey: "supplier",
     },
     {
-      header: 'Logged By',
+      header: "Receipt",
+      accessor: (p) => (
+        <div className="flex items-center gap-2">
+          {p.receiptUrl ? (
+            <a
+              href={p.receiptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-lg hover:bg-primary/20 transition-all flex items-center gap-1"
+            >
+              <FileText className="w-3 h-3" />
+              View Proof
+            </a>
+          ) : (
+            <span className="text-[10px] text-text-tertiary font-medium">
+              No Proof
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      header: "Logged By",
       accessor: (p) => (
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">
             {p.loggedBy?.name?.[0]}
           </div>
-          <span className="text-xs font-medium text-text-secondary">{p.loggedBy?.name}</span>
+          <span className="text-xs font-medium text-text-secondary">
+            {p.loggedBy?.name}
+          </span>
         </div>
       ),
       sortable: true,
-      sortKey: 'loggedById',
+      sortKey: "loggedById",
     },
   ];
 
@@ -169,8 +201,9 @@ export function PurchaseHistory() {
           onSort: setSort,
         }}
         emptyState={{
-          title: 'No purchases found',
-          description: 'Try adjusting your search or log a new purchase to see it here.',
+          title: "No purchases found",
+          description:
+            "Try adjusting your search or log a new purchase to see it here.",
           icon: <Package className="w-6 h-6 text-text-tertiary" />,
         }}
       />
