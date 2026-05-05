@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get("/", getStats);
 router.get("/dashboard", getStats);
 router.get("/kpis", getKPIs);
 router.get("/comparison", getComparison);

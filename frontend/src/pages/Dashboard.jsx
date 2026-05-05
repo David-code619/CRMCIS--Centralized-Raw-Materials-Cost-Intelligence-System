@@ -17,10 +17,12 @@ export function Dashboard() {
   const { status, error } = useSystemStatus();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
 
   const fetchStats = async () => {
     setLoading(true);
     try {
+      setFetchError(null);
       const res = await apiFetch('/api/stats');
       if (res.status === 401) {
         // Avoid hard reload loops; let auth context clear state and route normally.
@@ -38,10 +40,11 @@ export function Dashboard() {
       if (data && typeof data.totalStockValue === 'number') {
         setStats(data);
       } else {
-        throw new Error('Invalid data format');
+        throw new Error('Invalid data format received from server');
       }
     } catch (error) {
       console.error('Dashboard stats fetch error:', error);
+      setFetchError(error.message);
       setStats(null);
     } finally {
       setLoading(false);
@@ -74,11 +77,32 @@ export function Dashboard() {
   };
 
   const renderDashboard = () => {
-    if (loading || !stats) {
+    if (loading) {
       return (
         <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
           <p className="text-text-secondary font-medium animate-pulse">Analyzing cost intelligence...</p>
+        </div>
+      );
+    }
+
+    if (fetchError || !stats) {
+      return (
+        <div className="h-[60vh] flex flex-col items-center justify-center gap-4 p-8 text-center">
+          <div className="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center text-danger mb-2">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-text-primary">Intelligence Analysis Failed</h2>
+          <p className="text-text-secondary max-w-md mx-auto">
+            {fetchError || "We couldn't aggregate your cost data at this time. This usually happens if the database is busy or the session has expired."}
+          </p>
+          <button 
+            onClick={handleRefresh}
+            className="mt-4 px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2"
+          >
+            <Loader2 className={loading ? "w-4 h-4 animate-spin" : "hidden"} />
+            Retry Analysis
+          </button>
         </div>
       );
     }
