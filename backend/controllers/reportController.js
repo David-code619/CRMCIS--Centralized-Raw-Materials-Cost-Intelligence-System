@@ -22,13 +22,42 @@ export const getStats = async (req, res) => {
   }
 };
 
+/**
+ * Helper: merge branchId and query params into a single filters object
+ * with proper Date conversions for startDate/endDate.
+ */
+function buildFilters(branchId, query = {}) {
+  const { materialId, category, startDate, endDate } = query;
+
+  const now = new Date();
+  const defaultStart = new Date(now);
+  defaultStart.setMonth(defaultStart.getMonth() - 3);
+
+  const parsedStart = startDate ? new Date(startDate) : defaultStart;
+  const parsedEnd = endDate ? new Date(endDate) : now;
+
+  // Ensure the end date covers the full day
+  if (endDate) {
+    parsedEnd.setHours(23, 59, 59, 999);
+  }
+
+  return {
+    branchId: branchId || undefined,
+    materialId: materialId || undefined,
+    category: category || undefined,
+    startDate: parsedStart,
+    endDate: parsedEnd,
+  };
+}
+
 export const getKPIs = async (req, res) => {
   let branchId = null;
   if (req.user.role !== "SUPER_ADMIN") {
     branchId = req.user.branchId;
   }
   try {
-    const kpis = await getReportKPIs(branchId, req.query);
+    const filters = buildFilters(branchId, req.query);
+    const kpis = await getReportKPIs(filters);
     res.json(kpis);
   } catch (error) {
     console.error("KPI fetch error:", error);
@@ -38,7 +67,8 @@ export const getKPIs = async (req, res) => {
 
 export const getComparison = async (req, res) => {
   try {
-    const comparison = await getBranchComparison(req.query);
+    const filters = buildFilters(null, req.query);
+    const comparison = await getBranchComparison(filters);
     res.json(comparison);
   } catch (error) {
     console.error("Branch comparison error:", error);
@@ -52,7 +82,8 @@ export const getCostTrends = async (req, res) => {
     branchId = req.user.branchId;
   }
   try {
-    const trends = await getReportCostTrends(branchId, req.query);
+    const filters = buildFilters(branchId, req.query);
+    const trends = await getReportCostTrends(filters);
     res.json(trends);
   } catch (error) {
     console.error("Cost trends error:", error);
@@ -66,7 +97,8 @@ export const getTopConsumed = async (req, res) => {
     branchId = req.user.branchId;
   }
   try {
-    const data = await getTopConsumedMaterials(branchId, req.query);
+    const filters = buildFilters(branchId, req.query);
+    const data = await getTopConsumedMaterials(filters);
     res.json(data);
   } catch (error) {
     console.error("Top consumed materials error:", error);
@@ -80,7 +112,8 @@ export const getValueTrend = async (req, res) => {
     branchId = req.user.branchId;
   }
   try {
-    const data = await getInventoryValueTrend(branchId, req.query);
+    const filters = buildFilters(branchId, req.query);
+    const data = await getInventoryValueTrend(filters);
     res.json(data);
   } catch (error) {
     console.error("Inventory value trend error:", error);
@@ -103,7 +136,7 @@ export const getShrinkage = async (req, res) => {
       end.setHours(23, 59, 59, 999);
     }
 
-    const kpis = await getReportKPIs(branchId, { startDate: start, endDate: end });
+    const kpis = await getReportKPIs({ branchId, startDate: start, endDate: end });
     
     const purchases = await prisma.purchase.aggregate({
       where: { 

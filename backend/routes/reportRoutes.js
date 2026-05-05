@@ -10,6 +10,7 @@ router.get("/", getStats);
 router.get("/dashboard", getStats);
 router.get("/kpis", getKPIs);
 router.get("/comparison", getComparison);
+router.get("/branch-comparison", getComparison); // Alias for frontend compatibility
 router.get("/cost-trends", getCostTrends);
 router.get("/top-consumed", getTopConsumed);
 router.get("/value-trend", getValueTrend);

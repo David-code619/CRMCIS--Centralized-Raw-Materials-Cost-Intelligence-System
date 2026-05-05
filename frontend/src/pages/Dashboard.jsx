@@ -52,7 +52,7 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    if (user && status === 'ready') {
+    if (user && (status === 'ready' || status === 'error' || status === 'empty')) {
       fetchStats();
     }
   }, [user, status]);

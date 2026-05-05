@@ -11,22 +11,12 @@ const router = express.Router();
 
 router.use(authenticate);
 
-// Catalog routes
-router.get("/catalog", getCatalog); 
+// Catalog routes — GET /api/materials serves the catalog (frontend expects this)
+router.get("/", getCatalog);
+router.get("/catalog", getCatalog);
+router.post("/", authorize(["SUPER_ADMIN"]), addMaterial);
 router.post("/catalog", authorize(["SUPER_ADMIN"]), addMaterial);
-router.patch("/catalog/:id", authorize(["SUPER_ADMIN"]), editMaterial);
-router.delete("/catalog/:id", authorize(["SUPER_ADMIN"]), removeMaterial);
-
-// Branch material routes
-router.get("/branch-stats", authorize(["SUPER_ADMIN"]), getBranchStats);
-router.get("/:materialId/breakdown", authorize(["SUPER_ADMIN"]), getBreakdown);
-router.get("/", listBranchMaterials);
-router.post("/", linkMaterialToBranch);
-router.patch("/:id", updateBranchLink);
-router.delete("/:id", deleteBranchLink);
-
-// Legacy/Alternative branch-specific route
-// In server.js it was /api/branches/:id/materials
-// I'll handle that separately in server.js or redirect here.
+router.patch("/:id", authorize(["SUPER_ADMIN"]), editMaterial);
+router.delete("/:id", authorize(["SUPER_ADMIN"]), removeMaterial);
 
 export default router;

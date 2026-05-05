@@ -27,16 +27,16 @@ export function SystemGuard({ children }) {
     // ...
     // (I will copy the logic from the original file)
     try {
-      // 1. Basic Health Check
+      // 1. Basic Health Check — use the direct endpoint to avoid redirects
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
       
       let res;
       try {
-        res = await apiFetch('/api/health', { signal: controller.signal, redirect: 'manual' });
+        res = await apiFetch('/api/system/health', { signal: controller.signal });
       } catch (fetchErr) {
         try {
-          const pingRes = await apiFetch('/api/ping', { signal: controller.signal, credentials: 'same-origin' });
+          const pingRes = await apiFetch('/api/system/ping', { signal: controller.signal });
           if (pingRes.ok) {
             throw new Error('Server is reachable but the database connection is failing.', { cause: fetchErr });
           }
@@ -49,18 +49,12 @@ export function SystemGuard({ children }) {
         clearTimeout(timeoutId);
       }
       
-      // Handle redirects (e.g., HTTP to HTTPS) as successful
-      if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
-        // Redirect is fine, server is reachable
-      } else if (!res.ok) {
+      if (!res.ok) {
         throw new Error(`System health check failed with status ${res.status}`);
       }
       
-      // Only try to parse JSON if not a redirect
-      if (res.status < 300 || res.status >= 400) {
-        const data = await res.json();
-        if (data.status !== 'ok') throw new Error(data.error || 'Database disconnected');
-      }
+      const data = await res.json();
+      if (data.status !== 'ok') throw new Error(data.error || 'Database disconnected');
 
       // 2. Data Presence Check - Only if user is authenticated
       if (user) {
