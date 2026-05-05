@@ -1,9 +1,6 @@
 import express from "express";
 import { 
-  getCatalog, addMaterial, editMaterial, removeMaterial,
-  getBranchStats, getBreakdown, listBranchMaterials, 
-  linkMaterialToBranch,
-  updateBranchLink, deleteBranchLink
+  getCatalog, addMaterial, editMaterial, removeMaterial
 } from "../controllers/materialController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
 

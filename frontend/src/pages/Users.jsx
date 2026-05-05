@@ -303,14 +303,14 @@ export function Users() {
         />
         <KPICard 
           title="Active Users" 
-          value={data?.data.filter(u => u.isActive).length || 0} 
+          value={(data?.data || []).filter(u => u.isActive).length || 0} 
           icon={ShieldCheck}
           color="success"
           description="Users with system access"
         />
         <KPICard 
           title="Super Admins" 
-          value={data?.data.filter(u => u.role === 'SUPER_ADMIN').length || 0} 
+          value={(data?.data || []).filter(u => u.role === 'SUPER_ADMIN').length || 0} 
           icon={ShieldCheck}
           color="info"
           description="Full system control"
