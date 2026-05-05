@@ -426,8 +426,11 @@ export async function getDashboardStats(branchId, user) {
     });
   const alerts = Array.from(alertsMap.values());
 
-  // Chart Data: Top Consumed (for branch)
-  const topConsumed = await getTopConsumedMaterials({ branchId, startDate: thirtyDaysAgo, endDate: new Date() });
+  // Chart Data: Top Consumed & Branch Comparison
+  const [topConsumed, branchComparisonRaw] = await Promise.all([
+    getTopConsumedMaterials({ branchId, startDate: thirtyDaysAgo, endDate: new Date() }),
+    user.role === 'SUPER_ADMIN' ? getBranchComparison({ startDate: thirtyDaysAgo, endDate: new Date() }) : Promise.resolve([])
+  ]);
 
   // Chart Data: Stock Composition (by category)
   const categories = [...new Set(inventory.map(m => m.material.category))];
@@ -442,12 +445,10 @@ export async function getDashboardStats(branchId, user) {
     };
   }).filter(c => c.value > 0);
 
-  // Chart Data: Branch Comparison (Super Admin only)
+  // Map Branch Comparison to format expected by UI
   let branchComparison = [];
   if (user.role === 'SUPER_ADMIN') {
-    branchComparison = await getBranchComparison({ startDate: thirtyDaysAgo, endDate: new Date() });
-    // Map to format expected by UI
-    branchComparison = branchComparison.map(b => ({
+    branchComparison = branchComparisonRaw.map(b => ({
       name: b.branchName,
       value: inventory.filter(m => m.branchId === b.branchId).reduce((sum, m) => sum + (m.currentStock * m.avgCost), 0),
       shrinkage: b.shrinkageRate
@@ -455,8 +456,7 @@ export async function getDashboardStats(branchId, user) {
   }
 
   // Chart Data: Cost Trends (Last 6 months)
-  const costTrends = [];
-  for (let i = 5; i >= 0; i--) {
+  const costTrends = await Promise.all(Array.from({ length: 6 }, (_, i) => 5 - i).map(async (i) => {
     const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
     const monthName = monthDate.toLocaleString('default', { month: 'short' });
@@ -466,11 +466,11 @@ export async function getDashboardStats(branchId, user) {
       _sum: { totalCost: true }
     });
     
-    costTrends.push({
+    return {
       month: monthName,
       cost: monthPurchases._sum.totalCost || 0
-    });
-  }
+    };
+  }));
 
   // Inventory Officer Specifics
   const entriesToday = await Promise.all([

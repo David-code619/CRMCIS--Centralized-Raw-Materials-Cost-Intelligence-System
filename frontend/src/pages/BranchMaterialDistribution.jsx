@@ -226,7 +226,7 @@ export function BranchMaterialDistribution() {
 
   // Get materials from catalog that are NOT yet activated for this branch
   const availableCatalog = catalog.filter(catItem => 
-    !data?.data.some(bm => bm.materialId === catItem.id)
+    !(data?.data || []).some(bm => bm.materialId === catItem.id)
   );
 
   const columns = [
