@@ -60,8 +60,8 @@ export function AppShell({ children }) {
       )}>
         <TopNavbar onMenuClick={() => setIsMobileMenuOpen(true)} />
         
-        <main className="flex-1 p-3 md:p-4 overflow-y-auto">
-          <div className="max-w-6xl mx-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+          <div className="max-w-400 mx-auto w-full px-4 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

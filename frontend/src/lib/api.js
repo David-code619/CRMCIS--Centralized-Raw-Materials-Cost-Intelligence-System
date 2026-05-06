@@ -14,6 +14,7 @@ export function buildApiUrl(path) {
   return `${API_BASE}${path}`;
 }
 
+
 const AUTH_TOKEN_KEY = 'crmcis_auth_token';
 
 export function getAuthToken() {

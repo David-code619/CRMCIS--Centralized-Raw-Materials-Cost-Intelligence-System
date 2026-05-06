@@ -13,6 +13,7 @@ import { apiFetch, setAuthToken, clearAuthToken } from '../lib/api';
 
 const AuthContext = createContext(undefined);
 
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

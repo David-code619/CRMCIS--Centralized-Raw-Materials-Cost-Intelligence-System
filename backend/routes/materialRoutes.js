@@ -1,6 +1,9 @@
 import express from "express";
-import { 
-  getCatalog, addMaterial, editMaterial, removeMaterial
+import {
+  getCatalog,
+  addMaterial,
+  editMaterial,
+  removeMaterial,
 } from "../controllers/materialController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
 

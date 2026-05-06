@@ -16,7 +16,7 @@ export function Adjustments() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="w-full mx-auto space-y-8 pb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <Breadcrumbs items={[{ label: 'Stock Adjustments' }]} />

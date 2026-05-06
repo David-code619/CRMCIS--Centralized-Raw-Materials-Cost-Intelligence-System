@@ -331,7 +331,7 @@ export function Inventory() {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="w-full space-y-8 pb-8">
       <Breadcrumbs items={[{ label: 'Inventory' }]} />
       
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

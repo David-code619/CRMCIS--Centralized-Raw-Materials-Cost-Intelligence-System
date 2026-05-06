@@ -196,7 +196,7 @@ export function MaterialCatalog() {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="w-full space-y-8 pb-8">
       <Breadcrumbs items={[{ label: 'Material Catalog' }]} />
       
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

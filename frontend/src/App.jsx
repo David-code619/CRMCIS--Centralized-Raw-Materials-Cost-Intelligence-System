@@ -28,7 +28,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { SystemGuard } from './components/SystemGuard';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ToastProvider } from './components/ui/Toast';
-
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
