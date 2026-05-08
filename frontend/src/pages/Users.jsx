@@ -238,7 +238,12 @@ export function Users() {
     },
     {
       header: 'Actions',
-      accessor: (user) => (
+      accessor: (user) => {
+        const canEdit = currentUser?.role === 'SUPER_ADMIN' || (currentUser?.role === 'BRANCH_MANAGER' && user.role === 'INVENTORY_OFFICER');
+        
+        if (!canEdit) return null;
+
+        return (
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => openEditModal(user)}
@@ -271,7 +276,8 @@ export function Users() {
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
-      ),
+      );
+    },
       className: 'text-right',
     },
   ];
@@ -381,6 +387,7 @@ export function Users() {
         onSave={handleSaveUser} 
         user={editingUser}
         branches={branches}
+        currentUser={currentUser}
       />
     </div>
   );

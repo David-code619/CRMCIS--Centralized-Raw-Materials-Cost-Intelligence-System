@@ -31,7 +31,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, className }) {
     { icon: ArrowLeftRight, label: 'Transfers', path: '/transfers' },
     { icon: ClipboardList, label: 'Usage Log', path: '/usage' },
     { icon: BarChart3, label: 'Reports', path: '/reports', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'] },
-    { icon: Users, label: 'User Management', path: '/users', roles: ['SUPER_ADMIN'] },
+    { icon: Users, label: 'User Management', path: '/users', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'] },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 

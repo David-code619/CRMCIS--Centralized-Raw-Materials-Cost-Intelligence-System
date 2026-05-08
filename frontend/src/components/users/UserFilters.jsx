@@ -1,7 +1,6 @@
-import React from 'react';
 import { Search, Building2, ShieldCheck, Filter, X } from 'lucide-react';
 
-const ROLES = ['SUPER_ADMIN', 'BRANCH_ADMIN', 'STAFF'];
+const ROLES = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'INVENTORY_OFFICER'];
 
 export function UserFilters({ filters, setFilters, branches }) {
   const handleChange = (field, value) => {
@@ -19,7 +18,7 @@ export function UserFilters({ filters, setFilters, branches }) {
   return (
     <div className="stitch-card p-4 bg-background/50 backdrop-blur-sm border-border/50">
       <div className="flex flex-wrap items-center gap-4">
-        <div className="relative min-w-[200px]">
+        <div className="relative min-w-50">
           <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
           <select 
             className="stitch-input pl-10 w-full text-xs py-2"
@@ -33,7 +32,7 @@ export function UserFilters({ filters, setFilters, branches }) {
           </select>
         </div>
 
-        <div className="relative min-w-[200px]">
+        <div className="relative min-w-50">
           <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
           <select 
             className="stitch-input pl-10 w-full text-xs py-2"
@@ -45,7 +44,7 @@ export function UserFilters({ filters, setFilters, branches }) {
           </select>
         </div>
 
-        <div className="relative min-w-[160px]">
+        <div className="relative min-w-40">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
           <select 
             className="stitch-input pl-10 w-full text-xs py-2"

@@ -11,7 +11,6 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, AlertCircle, Database, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiFetch } from '../lib/api';
 import { SystemStatusProvider } from '../contexts/SystemStatusContext';
