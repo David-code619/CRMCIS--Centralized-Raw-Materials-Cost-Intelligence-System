@@ -5,12 +5,12 @@ import { authenticate, authorize } from "../middleware/auth.js";
 const router = express.Router();
 
 router.use(authenticate);
-router.use(authorize(["SUPER_ADMIN"]));
+router.use(authorize(["SUPER_ADMIN", 'BRANCH_MANAGER']));
 
 router.get("/", listUsers);
 router.post("/", addUser);
 router.patch("/:id", editUser);
 router.delete("/:id", removeUser);
-router.post("/:id/toggle-status", toggleStatus);
+router.patch("/:id/toggle-status", toggleStatus);
 
 export default router;
