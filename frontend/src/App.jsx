@@ -20,6 +20,7 @@ import { Reports } from "./pages/Reports";
 import { Branches } from "./pages/Branches";
 import { Users } from "./pages/Users";
 import { Usage } from "./pages/Usage";
+import { LandingPage } from './pages/LandingPage';
 import { Settings } from "./pages/Settings";
 import { LoginPage } from "./pages/LoginPage";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -40,6 +41,7 @@ export default function App() {
             <SystemGuard>
               <Routes>
                 {/* Public Routes */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
 
                 {/* 
@@ -48,7 +50,7 @@ export default function App() {
               role-based authorization before rendering the page.
             */}
                 <Route
-                  path="/"
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Dashboard />

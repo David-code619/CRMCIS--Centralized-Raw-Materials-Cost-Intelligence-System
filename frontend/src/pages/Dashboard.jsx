@@ -58,7 +58,7 @@ export function Dashboard() {
   }, [user, status]);
 
   // Redirect to role-specific dashboard if at root
-  if (location.pathname === '/') {
+  if (location.pathname === '/dashboard') {
     switch (user?.role) {
       case 'SUPER_ADMIN':
         return <Navigate to="/dashboard/super-admin" replace />;
