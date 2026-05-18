@@ -8,14 +8,15 @@ export const createBranch = async (req, res) => {
   }
 
   try {
-    const { name, location, contactInfo } = req.body;
+    const { name, location } = req.body;
+    const trimmedName = typeof name === "string" ? name.trim() : "";
 
-    if (!name) {
+    if (!trimmedName) {
       return res.status(400).json({ error: "Branch name is required" });
     }
 
     const branch = await prisma.branch.create({
-      data: { name, location, contactInfo },
+      data: { name: trimmedName, location },
     });
 
     res.status(201).json(branch);

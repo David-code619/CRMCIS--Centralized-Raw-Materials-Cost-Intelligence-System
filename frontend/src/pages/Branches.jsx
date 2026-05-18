@@ -13,7 +13,6 @@ export function Branches() {
   const [formData, setFormData] = useState({
     name: "",
     location: "",
-    contactInfo: "",
   });
   const { addToast } = useToast();
 
@@ -46,8 +45,13 @@ export function Branches() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+      if (!res.ok) throw new Error(data?.error || "Failed to create branch");
 
       addToast("Branch created successfully", "success");
       setBranches((prev) => [...prev, data]);
@@ -63,7 +67,6 @@ export function Branches() {
   const columns = [
     { accessor: "name", header: "Branch Name", sortable: true },
     { accessor: "location", header: "Location", sortable: true },
-    { accessor: "contactInfo", header: "Contact Info", sortable: false },
     {
       accessor: (item) => new Date(item.createdAt).toLocaleDateString(),
       header: "Created At",
@@ -149,21 +152,6 @@ export function Branches() {
               value={formData.location}
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
-              Contact Info
-            </label>
-            <input
-              type="text"
-              className="stitch-input w-full"
-              placeholder="e.g. branch@example.com / +123456789"
-              value={formData.contactInfo}
-              onChange={(e) =>
-                setFormData({ ...formData, contactInfo: e.target.value })
               }
             />
           </div>
