@@ -4,6 +4,7 @@ import { Breadcrumbs } from "../components/ui/Breadcrumbs";
 import { useToast } from "../components/ui/Toast";
 import { Modal } from "../components/ui/Modal";
 import { DataTable } from "../components/ui/DataTable";
+import { apiFetch } from "../lib/api";
 
 export function Branches() {
   const [branches, setBranches] = useState([]);
@@ -18,7 +19,7 @@ export function Branches() {
 
   const fetchBranches = async () => {
     try {
-      const res = await fetch("/api/branches");
+      const res = await apiFetch("/api/branches");
       if (res.ok) {
         const data = await res.json();
         setBranches(data);
@@ -40,7 +41,7 @@ export function Branches() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/branches", {
+      const res = await apiFetch("/api/branches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
