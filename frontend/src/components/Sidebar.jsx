@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -7,7 +6,8 @@ import {
   Store, 
   ShoppingCart, 
   History, 
-  ArrowLeftRight, 
+  ArrowLeftRight,
+  Building2, 
   BarChart3, 
   Users, 
   Settings, 
@@ -33,6 +33,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, className }) {
     { icon: BarChart3, label: 'Reports', path: '/reports', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'] },
     { icon: Users, label: 'User Management', path: '/users', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'] },
     { icon: Settings, label: 'Settings', path: '/settings' },
+      { icon: Building2, label: 'Branches', path: '/branches', roles: ['SUPER_ADMIN'] },
   ];
 
   const filteredNavItems = navItems.filter(item => 
