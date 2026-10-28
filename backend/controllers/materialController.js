@@ -16,7 +16,11 @@ import {
 // Catalog Controllers
 export const getCatalog = async (req, res) => {
   try {
-    const materials = await getMaterialCatalog(req.query, req.query);
+    const { category, search, sortBy, sortOrder, page, limit } = req.query;
+    const materials = await getMaterialCatalog(
+      { category },
+      { search, sortBy, sortOrder, page, limit }
+    );
     res.json(materials);
   } catch (error) {
     console.error("Failed to fetch materials:", error);
@@ -76,12 +80,16 @@ export const getBreakdown = async (req, res) => {
 };
 
 export const listBranchMaterials = async (req, res) => {
-  let { branchId } = req.query;
+  let { branchId, category, isActive, status, search, sortBy, sortOrder, page, limit } = req.query;
   if (req.user.role !== "SUPER_ADMIN") {
     branchId = req.user.branchId;
   }
   try {
-    const materials = await getBranchMaterials(branchId, req.query, req.query);
+    const materials = await getBranchMaterials(
+      branchId,
+      { category, isActive, status },
+      { search, sortBy, sortOrder, page, limit }
+    );
     res.json(materials);
   } catch (error) {
     console.error("Failed to fetch branch materials:", error);
@@ -90,12 +98,17 @@ export const listBranchMaterials = async (req, res) => {
 };
 
 export const getSpecificBranchMaterials = async (req, res) => {
-  let branchId = req.params.id;
+  const branchId = req.params.id;
   if (req.user.role !== "SUPER_ADMIN" && req.user.branchId !== branchId) {
     return res.status(403).json({ error: "Forbidden: You can only access your own branch's materials" });
   }
   try {
-    const materials = await getBranchMaterials(branchId, req.query, req.query);
+    const { category, isActive, status, search, sortBy, sortOrder, page, limit } = req.query;
+    const materials = await getBranchMaterials(
+      branchId,
+      { category, isActive, status },
+      { search, sortBy, sortOrder, page, limit }
+    );
     res.json(materials);
   } catch (error) {
     console.error("Error fetching branch materials:", error);

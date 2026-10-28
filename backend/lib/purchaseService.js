@@ -87,8 +87,7 @@ export async function logPurchase(data) {
         supplier,
         invoiceRef,
         purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
-        loggedById,
-        receiptUrl
+        loggedById
       },
       include: {
         material: true,

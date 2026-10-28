@@ -4,9 +4,9 @@ import {
   getReportCostTrends,
   getDashboardStats,
   getTopConsumedMaterials,
-  getInventoryValueTrend
+  getInventoryValueTrend,
+  getShrinkageMetrics
 } from "../lib/reportService.js";
-import { prisma } from "../lib/prisma.js";
 
 export const getStats = async (req, res) => {
   let branchId = null;
@@ -136,29 +136,8 @@ export const getShrinkage = async (req, res) => {
       end.setHours(23, 59, 59, 999);
     }
 
-    const kpis = await getReportKPIs({ branchId, startDate: start, endDate: end });
-    
-    const purchases = await prisma.purchase.aggregate({
-      where: { 
-        ...(branchId ? { branchId } : {}),
-        purchaseDate: { gte: start, lte: end } 
-      },
-      _sum: { quantity: true }
-    });
-
-    res.json({
-      shrinkageRate: kpis.shrinkageRate,
-      totalAdjustedQty: kpis.totalShrinkageQty,
-      adjustmentCount: await prisma.stockAdjustment.count({
-        where: { 
-          ...(branchId ? { branchId } : {}),
-          status: 'APPROVED', 
-          reason: { in: ['WASTE', 'LOSS'] },
-          adjustmentDate: { gte: start, lte: end }
-        }
-      }),
-      totalMovement: purchases._sum.quantity || 0
-    });
+    const metrics = await getShrinkageMetrics({ branchId, startDate: start, endDate: end });
+    res.json(metrics);
   } catch (error) {
     console.error("Shrinkage report error:", error);
     res.status(500).json({ error: "Failed to fetch shrinkage metrics" });

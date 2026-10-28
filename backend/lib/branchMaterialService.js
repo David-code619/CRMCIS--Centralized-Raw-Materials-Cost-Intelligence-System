@@ -32,34 +32,12 @@ export async function getBranchMaterials(
   }
 
   // Status filters
-  if (status) {
-    if (status === 'OUT_OF_STOCK') {
-      where.currentStock = 0;
-    } else if (status === 'LOW_STOCK') {
-      where.currentStock = {
-        gt: 0,
-        lte: prisma.branchMaterial.fields.reorderThreshold // This won't work directly in Prisma SQLite
-      };
-      // For SQLite, we might need a different approach or handle it in JS if it's complex, 
-      // but let's try a simpler way if possible or just filter in JS for now if needed.
-      // Actually, Prisma supports field comparisons in some providers but SQLite is limited.
-      // Let's use a raw query or just fetch and filter if the dataset isn't huge, 
-      // but for pagination we need it in the DB.
-    } else if (status === 'IN_STOCK') {
-      where.currentStock = {
-        gt: prisma.branchMaterial.fields.reorderThreshold
-      };
-    }
-  }
-
-  // Since SQLite doesn't support field-to-field comparison in 'where' easily via Prisma, 
-  // and the user wants "quantity <= reorderLevel", I'll have to handle 'status' carefully.
-  // If status is provided, I'll fetch all matching other filters and filter in JS, 
-  // then manually paginate. This is not ideal for performance but works for now.
-  
-  if (status && (status === 'LOW_STOCK' || status === 'IN_STOCK')) {
+  if (status === 'OUT_OF_STOCK') {
+    where.currentStock = 0;
+  } else if (status === 'LOW_STOCK' || status === 'IN_STOCK') {
+    // Reorder threshold is a column on the same record; fetch candidate records and filter in JS
     const allMaterials = await prisma.branchMaterial.findMany({
-      where: { ...where, currentStock: undefined }, // Remove the problematic filter
+      where,
       include: { material: true, branch: true },
       orderBy: { material: { name: 'asc' } }
     });

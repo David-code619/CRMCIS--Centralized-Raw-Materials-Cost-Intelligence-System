@@ -1,11 +1,11 @@
 import {
   getUsers,
+  getUserById,
   createUser,
   updateUser,
   deleteUser,
   toggleUserStatus,
 } from "../lib/userService.js";
-import { prisma } from "../lib/prisma.js";
 
 export const listUsers = async (req, res) => {
   try {
@@ -27,11 +27,9 @@ export const addUser = async (req, res) => {
     if (req.user.role === "BRANCH_MANAGER") {
       data.branchId = req.user.branchId;
       if (data.role === "SUPER_ADMIN" || data.role === "BRANCH_MANAGER") {
-        return res
-          .status(403)
-          .json({
-            error: "Branch Managers can only create Inventory Officers",
-          });
+        return res.status(403).json({
+          error: "Branch Managers can only create Inventory Officers",
+        });
       }
       data.role = "INVENTORY_OFFICER";
     }
@@ -45,7 +43,7 @@ export const addUser = async (req, res) => {
 
 const verifyUserAccess = async (req, userId) => {
   if (req.user.role === "SUPER_ADMIN") return true;
-  const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+  const targetUser = await getUserById(userId);
   if (!targetUser) return false;
   return (
     targetUser.branchId === req.user.branchId &&

@@ -1,8 +1,8 @@
 import { 
-  getTransferHistory as getTransfers, 
-  createTransferRequest as createTransfer, 
-  processTransferApproval as updateTransfer, 
-  completeTransfer as deleteTransfer 
+  getTransferHistory, 
+  createTransferRequest, 
+  processTransferApproval, 
+  completeTransfer 
 } from "../lib/transferService.js";
 
 export const listTransfers = async (req, res) => {
@@ -11,7 +11,7 @@ export const listTransfers = async (req, res) => {
     branchId = req.user.branchId;
   }
   try {
-    const transfers = await getTransfers({ branchId }, req.query);
+    const transfers = await getTransferHistory({ branchId }, req.query);
     res.json(transfers);
   } catch (error) {
     console.error("Failed to fetch transfers:", error);
@@ -25,7 +25,7 @@ export const recordTransfer = async (req, res) => {
     data.fromBranchId = req.user.branchId;
   }
   try {
-    const transfer = await createTransfer(data);
+    const transfer = await createTransferRequest(data);
     res.status(201).json(transfer);
   } catch (error) {
     res.status(500).json({ error: error.message || "Failed to record transfer" });
@@ -34,7 +34,7 @@ export const recordTransfer = async (req, res) => {
 
 export const approveTransfer = async (req, res) => {
   try {
-    const transfer = await updateTransfer(req.params.id, req.user.id, 'APPROVED', req.body.notes);
+    const transfer = await processTransferApproval(req.params.id, req.user.id, 'APPROVED', req.body.notes);
     res.json(transfer);
   } catch (error) {
     res.status(500).json({ error: error.message || "Failed to approve transfer" });
@@ -43,7 +43,7 @@ export const approveTransfer = async (req, res) => {
 
 export const finalizeTransfer = async (req, res) => {
   try {
-    const transfer = await deleteTransfer(req.params.id);
+    const transfer = await completeTransfer(req.params.id);
     res.json(transfer);
   } catch (error) {
     console.error("Failed to complete transfer:", error);

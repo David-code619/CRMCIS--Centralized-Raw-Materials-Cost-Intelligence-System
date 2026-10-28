@@ -9,8 +9,23 @@ import { prisma } from './prisma.js';
 import bcrypt from 'bcryptjs';
 import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.js';
 
+export const USER_SAFE_SELECT = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  branchId: true,
+  isActive: true,
+  createdAt: true,
+  updatedAt: true,
+  branch: {
+    select: { name: true }
+  }
+};
+
 /**
  * Fetches all users with optional filters, pagination, and search.
+ * Excludes password hashes from returned data for security.
  */
 export async function getUsers(
   filters = {},
@@ -45,11 +60,7 @@ export async function getUsers(
   const [users, total] = await Promise.all([
     prisma.user.findMany({
       where,
-      include: {
-        branch: {
-          select: { name: true }
-        }
-      },
+      select: USER_SAFE_SELECT,
       skip,
       take,
       orderBy
@@ -61,14 +72,20 @@ export async function getUsers(
 }
 
 /**
+ * Fetches a single user by ID safely (without password).
+ */
+export async function getUserById(id) {
+  return await prisma.user.findUnique({
+    where: { id },
+    select: USER_SAFE_SELECT
+  });
+}
+
+/**
  * Creates a new user with a hashed password.
  * 
  * @param data - User details including email, name, role, and optional branch.
- * @returns The created user record.
- * 
- * Business Logic:
- * 1. Hashes the password using bcrypt (defaulting to 'admin123' for initial setup).
- * 2. Ensures SUPER_ADMINs are not tied to a specific branch.
+ * @returns The created user record without password.
  */
 export async function createUser(data) {
   const { email, name, role, branchId, password } = data;
@@ -87,11 +104,7 @@ export async function createUser(data) {
       password: hashedPassword,
       isActive: true
     },
-    include: {
-      branch: {
-        select: { name: true }
-      }
-    }
+    select: USER_SAFE_SELECT
   });
 }
 
@@ -110,16 +123,12 @@ export async function updateUser(id, data) {
       branchId: role === 'SUPER_ADMIN' ? null : branchId,
       isActive
     },
-    include: {
-      branch: {
-        select: { name: true }
-      }
-    }
+    select: USER_SAFE_SELECT
   });
 }
 
 /**
- * Deletes a user (or deactivates).
+ * Deletes a user.
  */
 export async function deleteUser(id) {
   return await prisma.user.delete({
@@ -133,6 +142,7 @@ export async function deleteUser(id) {
 export async function toggleUserStatus(id, isActive) {
   return await prisma.user.update({
     where: { id },
-    data: { isActive }
+    data: { isActive },
+    select: USER_SAFE_SELECT
   });
 }

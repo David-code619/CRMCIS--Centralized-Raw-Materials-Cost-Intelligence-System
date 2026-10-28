@@ -1,40 +1,11 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
+import { setAuthCookie, clearAuthCookie } from "../lib/cookieUtils.js";
+
+export { clearAuthCookie };
 
 const JWT_SECRET = process.env.JWT_SECRET || "crmcis-secret-key-2024";
-
-const getCookieMode = (req) => {
-  const isSecureRequest =
-    req.secure ||
-    req.headers["x-forwarded-proto"] === "https" ||
-    process.env.NODE_ENV === "production";
-  return {
-    secure: isSecureRequest,
-    sameSite: isSecureRequest ? "none" : "lax",
-  };
-};
-
-
-export const clearAuthCookie = (req, res) => {
-  const mode = getCookieMode(req);
-
-  // Clear using the mode for this request.
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: mode.secure,
-    sameSite: mode.sameSite,
-    path: "/",
-  });
-
-  // Also clear the other common mode to avoid mismatches across deployments/config changes.
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: !mode.secure,
-    sameSite: mode.sameSite === "none" ? "lax" : "none",
-    path: "/",
-  });
-};
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
@@ -83,14 +54,7 @@ export const login = async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    const { secure: cookieSecure, sameSite: cookieSameSite } = getCookieMode(req);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: cookieSecure,
-      sameSite: cookieSameSite,
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
+    setAuthCookie(res, req, token);
 
     const userWithoutPassword = { ...user };
     delete userWithoutPassword.password;

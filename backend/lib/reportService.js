@@ -553,3 +553,35 @@ export async function getDashboardStats(branchId, user) {
     }
   };
 }
+
+/**
+ * Fetches shrinkage metrics and adjustment counts for a branch and date range.
+ */
+export async function getShrinkageMetrics({ branchId, startDate, endDate }) {
+  const kpis = await getReportKPIs({ branchId, startDate, endDate });
+
+  const purchases = await prisma.purchase.aggregate({
+    where: {
+      ...(branchId ? { branchId } : {}),
+      purchaseDate: { gte: startDate, lte: endDate }
+    },
+    _sum: { quantity: true }
+  });
+
+  const adjustmentCount = await prisma.stockAdjustment.count({
+    where: {
+      ...(branchId ? { branchId } : {}),
+      status: 'APPROVED',
+      reason: { in: ['WASTE', 'LOSS'] },
+      adjustmentDate: { gte: startDate, lte: endDate }
+    }
+  });
+
+  return {
+    shrinkageRate: kpis.shrinkageRate,
+    totalAdjustedQty: kpis.totalShrinkageQty,
+    adjustmentCount,
+    totalMovement: purchases._sum.quantity || 0
+  };
+}
+

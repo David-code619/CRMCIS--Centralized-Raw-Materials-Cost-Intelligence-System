@@ -1,6 +1,6 @@
 import { 
-  getUsageHistory as getUsageLogs, 
-  logUsage as createUsageLog,
+  getUsageHistory, 
+  logUsage,
   auditAllUsageLogs
 } from "../lib/usageService.js";
 
@@ -10,7 +10,7 @@ export const listUsageLogs = async (req, res) => {
     branchId = req.user.branchId;
   }
   try {
-    const logs = await getUsageLogs({ branchId }, req.query);
+    const logs = await getUsageHistory({ branchId }, req.query);
     res.json(logs);
   } catch (error) {
     console.error("Failed to fetch usage logs:", error);
@@ -24,7 +24,7 @@ export const recordUsage = async (req, res) => {
     data.branchId = req.user.branchId;
   }
   try {
-    const log = await createUsageLog(data);
+    const log = await logUsage(data);
     res.status(201).json(log);
   } catch (error) {
     res.status(500).json({ error: error.message || "Failed to record usage" });

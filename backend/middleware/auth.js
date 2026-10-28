@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
-import { clearAuthCookie } from "../controllers/authController.js";
+import { clearAuthCookie } from "../lib/cookieUtils.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "crmcis-secret-key-2024";
 
