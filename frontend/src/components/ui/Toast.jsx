@@ -12,9 +12,9 @@ export function ToastProvider({ children }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const addToast = useCallback((message, type) => {
+  const addToast = useCallback((message, type = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type: type || 'info' }]);
     setTimeout(() => removeToast(id), 5000);
   }, [removeToast]);
 

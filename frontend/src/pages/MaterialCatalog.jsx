@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { DataTable } from '../components/ui/DataTable';
 import { FilterToolbar } from '../components/ui/FilterToolbar';
 import { useDataTable } from '../hooks/useDataTable';
-import { apiFetch } from '../lib/api';
+import { materialsApi } from '../lib/api';
 
 export function MaterialCatalog() {
   const {
@@ -50,21 +50,17 @@ export function MaterialCatalog() {
   const fetchMaterials = useCallback(async () => {
     try {
       setIsLoading(true);
-      const queryParams = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
+      const result = await materialsApi.list({
+        page,
+        limit,
         search,
         sortBy,
         sortOrder,
         category: getFilter('category'),
       });
-
-      const response = await apiFetch(`/api/materials?${queryParams.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch materials');
-      const result = await response.json();
       setData(result);
     } catch (error) {
-      addToast('Error fetching material catalog', 'error');
+      addToast(error.message || 'Error fetching material catalog', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -98,22 +94,17 @@ export function MaterialCatalog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingMaterial ? `/api/materials/${editingMaterial.id}` : `/api/materials`;
-      const method = editingMaterial ? 'PATCH' : 'POST';
-      
-      const response = await apiFetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) throw new Error('Failed to save material');
-      
-      addToast(editingMaterial ? 'Material updated' : 'Material added to catalog', 'success');
+      if (editingMaterial) {
+        await materialsApi.update(editingMaterial.id, formData);
+        addToast('Material updated', 'success');
+      } else {
+        await materialsApi.create(formData);
+        addToast('Material added to catalog', 'success');
+      }
       setIsModalOpen(false);
       fetchMaterials();
     } catch (error) {
-      addToast('Error saving material', 'error');
+      addToast(error.message || 'Error saving material', 'error');
     }
   };
 
@@ -121,12 +112,11 @@ export function MaterialCatalog() {
     if (!confirm('Are you sure you want to remove this material from the global catalog? This may affect branch inventory.')) return;
     
     try {
-      const response = await apiFetch(`/api/materials/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete material');
+      await materialsApi.delete(id);
       addToast('Material removed from catalog', 'success');
       fetchMaterials();
     } catch (error) {
-      addToast('Error deleting material', 'error');
+      addToast(error.message || 'Error deleting material', 'error');
     }
   };
 

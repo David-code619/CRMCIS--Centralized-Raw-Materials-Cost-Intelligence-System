@@ -12,48 +12,53 @@ export function useDataTable(options = {}) {
 
   const setPage = useCallback((newPage) => {
     setSearchParams((prev) => {
-      prev.set('page', String(newPage));
-      return prev;
+      const next = new URLSearchParams(prev);
+      next.set('page', String(newPage));
+      return next;
     });
   }, [setSearchParams]);
 
   const setLimit = useCallback((newLimit) => {
     setSearchParams((prev) => {
-      prev.set('limit', String(newLimit));
-      prev.set('page', '1'); // Reset to first page when limit changes
-      return prev;
+      const next = new URLSearchParams(prev);
+      next.set('limit', String(newLimit));
+      next.set('page', '1'); // Reset to first page when limit changes
+      return next;
     });
   }, [setSearchParams]);
 
   const setSearch = useCallback((newSearch) => {
     setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
       if (newSearch) {
-        prev.set('search', newSearch);
+        next.set('search', newSearch);
       } else {
-        prev.delete('search');
+        next.delete('search');
       }
-      prev.set('page', '1'); // Reset to first page when search changes
-      return prev;
+      next.set('page', '1'); // Reset to first page when search changes
+      return next;
     });
   }, [setSearchParams]);
 
   const setSort = useCallback((newSortBy, newSortOrder) => {
     setSearchParams((prev) => {
-      prev.set('sortBy', newSortBy);
-      prev.set('sortOrder', newSortOrder);
-      return prev;
+      const next = new URLSearchParams(prev);
+      next.set('sortBy', newSortBy);
+      next.set('sortOrder', newSortOrder);
+      return next;
     });
   }, [setSearchParams]);
 
   const setFilter = useCallback((key, value) => {
     setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
       if (value) {
-        prev.set(key, value);
+        next.set(key, value);
       } else {
-        prev.delete(key);
+        next.delete(key);
       }
-      prev.set('page', '1'); // Reset to first page when filters change
-      return prev;
+      next.set('page', '1'); // Reset to first page when filters change
+      return next;
     });
   }, [setSearchParams]);
 

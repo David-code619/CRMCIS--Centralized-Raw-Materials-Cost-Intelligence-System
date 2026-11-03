@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
-import { Building2, Plus, Loader2 } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Building2, Plus, Loader2, Search } from "lucide-react";
 import { Breadcrumbs } from "../components/ui/Breadcrumbs";
 import { useToast } from "../components/ui/Toast";
 import { Modal } from "../components/ui/Modal";
 import { DataTable } from "../components/ui/DataTable";
-import { apiFetch } from "../lib/api";
+import { branchesApi } from "../lib/api";
 
 export function Branches() {
   const [branches, setBranches] = useState([]);
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,15 +20,11 @@ export function Branches() {
 
   const fetchBranches = async () => {
     try {
-      const res = await apiFetch("/api/branches");
-      if (res.ok) {
-        const data = await res.json();
-        setBranches(data);
-      } else {
-        throw new Error("Failed to fetch branches");
-      }
+      setIsLoading(true);
+      const data = await branchesApi.list();
+      setBranches(Array.isArray(data) ? data : data?.data || []);
     } catch (error) {
-      addToast(error.message, "error");
+      addToast(error.message || "Failed to fetch branches", "error");
     } finally {
       setIsLoading(false);
     }
@@ -41,29 +38,27 @@ export function Branches() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await apiFetch("/api/branches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      let data = null;
-      try {
-        data = await res.json();
-      } catch {
-        data = null;
-      }
-      if (!res.ok) throw new Error(data?.error || "Failed to create branch");
-
+      const newBranch = await branchesApi.create(formData);
       addToast("Branch created successfully", "success");
-      setBranches((prev) => [...prev, data]);
+      setBranches((prev) => [...prev, newBranch]);
       setIsModalOpen(false);
-      setFormData({ name: "", location: "", contactInfo: "" });
+      setFormData({ name: "", location: "" });
     } catch (error) {
-      addToast(error.message, "error");
+      addToast(error.message || "Failed to create branch", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const filteredBranches = useMemo(() => {
+    if (!search.trim()) return branches;
+    const term = search.toLowerCase();
+    return branches.filter(
+      (b) =>
+        b.name?.toLowerCase().includes(term) ||
+        b.location?.toLowerCase().includes(term)
+    );
+  }, [branches, search]);
 
   const columns = [
     { accessor: "name", header: "Branch Name", sortable: true },
@@ -78,7 +73,7 @@ export function Branches() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-64 items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -106,16 +101,34 @@ export function Branches() {
       </div>
 
       <div className="stitch-card overflow-hidden">
-        <div className="p-4 border-b border-border bg-background/50 flex items-center gap-3">
-          <Building2 className="w-5 h-5 text-text-secondary" />
-          <h2 className="font-bold text-text-primary">Branch List</h2>
+        <div className="p-4 border-b border-border bg-background/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Building2 className="w-5 h-5 text-text-secondary" />
+            <h2 className="font-bold text-text-primary">Branch List</h2>
+          </div>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+            <input
+              type="text"
+              placeholder="Search branches..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="stitch-input pl-9 w-full text-xs py-1.5"
+            />
+          </div>
         </div>
 
         <DataTable
           columns={columns}
-          data={branches}
+          data={filteredBranches}
           keyField="id"
-          searchPlaceholder="Search branches..."
+          emptyState={{
+            title: search ? "No matching branches" : "No branches found",
+            description: search
+              ? "Try adjusting your search keyword."
+              : "Create your first branch using the button above.",
+          }}
         />
       </div>
 
@@ -123,7 +136,6 @@ export function Branches() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Create New Branch"
-        description="Add a new branch to the organization"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">

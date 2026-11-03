@@ -20,7 +20,7 @@ import { Reports } from "./pages/Reports";
 import { Branches } from "./pages/Branches";
 import { Users } from "./pages/Users";
 import { Usage } from "./pages/Usage";
-import { LandingPage } from './pages/LandingPage';
+import { LandingPage } from "./pages/LandingPage";
 import { Settings } from "./pages/Settings";
 import { LoginPage } from "./pages/LoginPage";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -45,179 +45,90 @@ export default function App() {
                 <Route path="/login" element={<LoginPage />} />
 
                 {/* 
-              Protected Routes 
-              The ProtectedRoute component handles session verification and 
-              role-based authorization before rendering the page.
-            */}
+                  Protected Routes sharing the global App Layout.
+                  Using a layout route keeps the sidebar and header mounted
+                  between navigation, preventing UI flicker and state loss.
+                */}
                 <Route
-                  path="/dashboard"
                   element={
                     <ProtectedRoute>
-                      <Dashboard />
+                      <Layout />
                     </ProtectedRoute>
                   }
-                />
-
-                {/* Role-Specific Dashboards */}
-                <Route
-                  path="/dashboard/super-admin"
-                  element={
-                    <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-                      <Layout>
+                >
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route
+                    path="/dashboard/super-admin"
+                    element={
+                      <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
                         <Dashboard />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/dashboard/branch-manager"
-                  element={
-                    <ProtectedRoute allowedRoles={["BRANCH_MANAGER"]}>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/branch-manager"
+                    element={
+                      <ProtectedRoute allowedRoles={["BRANCH_MANAGER"]}>
                         <Dashboard />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/dashboard/inventory-officer"
-                  element={
-                    <ProtectedRoute allowedRoles={["INVENTORY_OFFICER"]}>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/inventory-officer"
+                    element={
+                      <ProtectedRoute allowedRoles={["INVENTORY_OFFICER"]}>
                         <Dashboard />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                <Route
-                  path="/inventory"
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={["SUPER_ADMIN", "BRANCH_MANAGER"]}
-                    >
-                      <Layout>
+                  <Route
+                    path="/inventory"
+                    element={
+                      <ProtectedRoute allowedRoles={["SUPER_ADMIN", "BRANCH_MANAGER"]}>
                         <Inventory />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/material-catalog"
-                  element={
-                    <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/material-catalog"
+                    element={
+                      <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
                         <MaterialCatalog />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/branch-materials"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <BranchMaterialDistribution />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/purchases"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <PurchaseLog />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/adjustments"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Adjustments />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/transfers"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Transfers />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/usage"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Usage />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/reports"
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={["SUPER_ADMIN", "BRANCH_MANAGER"]}
-                    >
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/branch-materials" element={<BranchMaterialDistribution />} />
+                  <Route path="/purchases" element={<PurchaseLog />} />
+                  <Route path="/adjustments" element={<Adjustments />} />
+                  <Route path="/transfers" element={<Transfers />} />
+                  <Route path="/usage" element={<Usage />} />
+                  <Route
+                    path="/reports"
+                    element={
+                      <ProtectedRoute allowedRoles={["SUPER_ADMIN", "BRANCH_MANAGER"]}>
                         <Reports />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/users"
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={["SUPER_ADMIN", "BRANCH_MANAGER"]}
-                    >
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users"
+                    element={
+                      <ProtectedRoute allowedRoles={["SUPER_ADMIN", "BRANCH_MANAGER"]}>
                         <Users />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/branches"
-                  element={
-                    <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/branches"
+                    element={
+                      <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
                         <Branches />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Settings />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/settings" element={<Settings />} />
+                </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

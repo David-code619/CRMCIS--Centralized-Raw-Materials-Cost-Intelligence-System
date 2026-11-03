@@ -11,6 +11,7 @@ export function DataTable({
   pagination,
   sort,
   onRowClick,
+  onRowAction,
   rowClassName,
   className,
 }) {
@@ -59,7 +60,7 @@ export function DataTable({
                   </div>
                 </th>
               ))}
-              <th className="px-4 py-4 text-right w-10"></th>
+              {onRowAction && <th className="px-4 py-4 text-right w-10"></th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -71,12 +72,12 @@ export function DataTable({
                       <div className="h-4 bg-border rounded w-full" />
                     </td>
                   ))}
-                  <td className="px-4 py-4"></td>
+                  {onRowAction && <td className="px-4 py-4"></td>}
                 </tr>
               ))
-            ) : data.length === 0 ? (
+            ) : (data || []).length === 0 ? (
               <tr>
-                <td colSpan={columns.length + 1} className="px-6 py-12 text-center">
+                <td colSpan={columns.length + (onRowAction ? 1 : 0)} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center gap-2">
                     {emptyState?.icon || <div className="p-3 bg-background rounded-full border border-border"><MoreHorizontal className="w-6 h-6 text-text-tertiary" /></div>}
                     <p className="text-sm font-bold text-text-primary tracking-tight">
@@ -89,7 +90,7 @@ export function DataTable({
                 </td>
               </tr>
             ) : (
-              data.map((item, idx) => (
+              (data || []).map((item, idx) => (
                 <tr
                   key={item.id || idx}
                   onClick={() => onRowClick?.(item)}
@@ -109,11 +110,20 @@ export function DataTable({
                         : item[col.accessor]}
                     </td>
                   ))}
-                  <td className="px-4 py-4 text-right">
-                    <button className="p-1.5 hover:bg-border rounded-full transition-colors opacity-0 group-hover:opacity-100">
-                      <MoreHorizontal className="w-4 h-4 text-text-tertiary" />
-                    </button>
-                  </td>
+                  {onRowAction && (
+                    <td className="px-4 py-4 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRowAction(item);
+                        }}
+                        className="p-1.5 hover:bg-border rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                        title="Row options"
+                      >
+                        <MoreHorizontal className="w-4 h-4 text-text-tertiary" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

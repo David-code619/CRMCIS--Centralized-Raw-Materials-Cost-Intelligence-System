@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
    * The backend sets an HTTP-only JWT cookie upon success.
    */
   const login = async (email, password) => {
-    console.log('AuthContext: login called with:', { email, password });
+    console.log('AuthContext: login called for:', { email });
     const res = await apiFetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -87,6 +87,18 @@ export function AuthProvider({ children }) {
       setUser(null);
     }
   };
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      clearAuthToken();
+      setUser(null);
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>

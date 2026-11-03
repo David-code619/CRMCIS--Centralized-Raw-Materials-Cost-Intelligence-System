@@ -254,11 +254,11 @@ export function TopNavbar({ onMenuClick, className }) {
             className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-background rounded-full transition-colors group"
           >
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-text-primary tracking-tight">{user?.name}</p>
-              <p className="text-[10px] text-text-tertiary font-medium uppercase tracking-wider">{user?.role.replace('_', ' ')}</p>
+              <p className="text-xs font-bold text-text-primary tracking-tight">{user?.name || 'User'}</p>
+              <p className="text-[10px] text-text-tertiary font-medium uppercase tracking-wider">{user?.role ? user.role.replace('_', ' ') : ''}</p>
             </div>
             <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold shadow-sm ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
-              {user?.name.split(' ').map(n => n[0]).join('')}
+              {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'U'}
             </div>
           </button>
 

@@ -19,7 +19,7 @@ export function Breadcrumbs({ items, className }) {
   return (
     <nav className={cn('flex items-center gap-2 text-xs font-medium mb-6', className)}>
       <Link
-        to="/"
+        to="/dashboard"
         className="text-text-tertiary hover:text-primary transition-colors flex items-center gap-1"
       >
         <Home className="w-3.5 h-3.5" />

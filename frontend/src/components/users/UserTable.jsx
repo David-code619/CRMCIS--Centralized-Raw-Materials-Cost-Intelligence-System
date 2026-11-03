@@ -33,7 +33,7 @@ export function UserTable({ users, onEdit, onToggleStatus, onDelete }) {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shadow-inner">
-                        {user.name.split(' ').map((n) => n[0]).join('')}
+                        {user.name ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : 'U'}
                       </div>
                       <div>
                         <p className="text-sm font-bold text-text-primary tracking-tight">{user.name}</p>
@@ -51,7 +51,7 @@ export function UserTable({ users, onEdit, onToggleStatus, onDelete }) {
                         user.role === 'SUPER_ADMIN' ? "text-primary" : "text-text-tertiary"
                       )} />
                       <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                        {user.role.replace('_', ' ')}
+                        {user.role ? user.role.replace('_', ' ') : 'USER'}
                       </span>
                     </div>
                   </td>

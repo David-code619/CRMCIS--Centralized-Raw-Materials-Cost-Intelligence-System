@@ -10,7 +10,7 @@ import { FilterToolbar } from '../components/ui/FilterToolbar';
 import { useDataTable } from '../hooks/useDataTable';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { cn } from '../lib/utils';
-import { apiFetch } from '../lib/api';
+import { usersApi, branchesApi, api } from '../lib/api';
 
 export function Users() {
   const { user: currentUser } = useAuth();
@@ -38,9 +38,9 @@ export function Users() {
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const queryParams = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
+      const result = await usersApi.list({
+        page,
+        limit,
         search,
         sortBy,
         sortOrder,
@@ -48,21 +48,10 @@ export function Users() {
         branchId: getFilter('branchId'),
         isActive: getFilter('isActive'),
       });
-
-      const response = await apiFetch(`/api/users?${queryParams.toString()}`);
-      if (response.status === 401) {
-        window.location.href = '/login';
-        return;
-      }
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to fetch users');
-      }
-      const result = await response.json();
       setData(result);
     } catch (error) {
       console.error('Fetch users error:', error);
-      addToast('Failed to load users', 'error');
+      addToast(error.message || 'Failed to load users', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -75,17 +64,10 @@ export function Users() {
   useEffect(() => {
     async function fetchBranches() {
       try {
-        const response = await apiFetch('/api/branches');
-        if (!response.ok) throw new Error('Failed to load branches');
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setBranches(data);
-        } else {
-          console.error('Invalid branches data:', data);
-          setBranches([]);
-        }
+        const data = await branchesApi.list();
+        setBranches(Array.isArray(data) ? data : data?.data || []);
       } catch (error) {
-        addToast('Failed to load branches', 'error');
+        addToast(error.message || 'Failed to load branches', 'error');
         setBranches([]);
       }
     }
@@ -94,63 +76,37 @@ export function Users() {
 
   const handleSaveUser = async (formData) => {
     try {
-      const method = editingUser ? 'PATCH' : 'POST';
-      const url = editingUser ? `/api/users/${editingUser.id}` : `/api/users`;
-      
-      const response = await apiFetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save user');
+      if (editingUser) {
+        await usersApi.update(editingUser.id, formData);
+        addToast('User updated successfully', 'success');
+      } else {
+        await usersApi.create(formData);
+        addToast('User invited successfully', 'success');
       }
-
-      addToast(editingUser ? 'User updated successfully' : 'User invited successfully', 'success');
       fetchUsers();
     } catch (error) {
-      addToast(error.message, 'error');
+      addToast(error.message || 'Failed to save user', 'error');
       throw error;
     }
   };
 
   const handleToggleStatus = async (id, isActive) => {
     try {
-      const response = await apiFetch(`/api/users/${id}/toggle-status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to update status');
-      }
-
+      await api.patch(`/api/users/${id}/toggle-status`, { isActive });
       addToast(`User ${isActive ? 'activated' : 'deactivated'} successfully`, 'success');
       fetchUsers();
     } catch (error) {
-      addToast(error.message, 'error');
+      addToast(error.message || 'Failed to update status', 'error');
     }
   };
 
   const handleDeleteUser = async (id) => {
     try {
-      const response = await apiFetch(`/api/users/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to delete user');
-      }
-
+      await usersApi.delete(id);
       addToast('User deleted successfully', 'success');
       fetchUsers();
     } catch (error) {
-      addToast(error.message, 'error');
+      addToast(error.message || 'Failed to delete user', 'error');
     }
   };
 

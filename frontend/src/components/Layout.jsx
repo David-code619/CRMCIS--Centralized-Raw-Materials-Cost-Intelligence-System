@@ -8,15 +8,13 @@
  */
 
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import { AppShell } from './layout/AppShell';
-import { ToastProvider } from './ui/Toast';
 
 export function Layout({ children }) {
   return (
-    <ToastProvider>
-      <AppShell>
-        {children}
-      </AppShell>
-    </ToastProvider>
+    <AppShell>
+      {children || <Outlet />}
+    </AppShell>
   );
 }

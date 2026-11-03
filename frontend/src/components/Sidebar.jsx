@@ -22,7 +22,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, className }) {
   const { user } = useAuth();
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'INVENTORY_OFFICER'] },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'INVENTORY_OFFICER'] },
     { icon: Package, label: 'Inventory', path: '/inventory', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'] },
     { icon: BookOpen, label: 'Material Catalog', path: '/material-catalog', roles: ['SUPER_ADMIN'] },
     { icon: Store, label: 'Material Distribution', path: '/branch-materials' },
