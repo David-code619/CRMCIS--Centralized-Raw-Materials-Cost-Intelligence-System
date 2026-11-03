@@ -1,5 +1,6 @@
 import { prisma } from './prisma.js';
 import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.js';
+import { buildPrismaWhere, buildPrismaOrderBy } from './queryBuilder.js';
 
 /**
  * Fetches all materials with optional filters, pagination, and search.
@@ -8,25 +9,15 @@ export async function getMaterialCatalog(
   filters = {},
   params = {}
 ) {
-  const { category } = filters;
-  const { search, sortBy, sortOrder } = params;
+  const mergedFilters = { ...params, ...filters };
   const { skip, take } = getPrismaPagination(params);
 
-  const where = {};
-  if (category) where.category = category;
+  const where = buildPrismaWhere(mergedFilters, {
+    allowedKeys: ['category'],
+    searchFields: ['name', 'description']
+  });
 
-  if (search) {
-    where.OR = [
-      { name: { contains: search } },
-    ];
-  }
-
-  const orderBy = {};
-  if (sortBy) {
-    orderBy[sortBy] = sortOrder || 'asc';
-  } else {
-    orderBy.name = 'asc';
-  }
+  const orderBy = buildPrismaOrderBy(params, { name: 'asc' });
 
   const [materials, total] = await Promise.all([
     prisma.materialCatalog.findMany({

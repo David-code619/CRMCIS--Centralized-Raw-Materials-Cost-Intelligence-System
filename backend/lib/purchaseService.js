@@ -8,6 +8,7 @@
 import { prisma } from './prisma.js';
 import { calculateWeightedAverageCost } from './inventoryUtils.js';
 import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.js';
+import { buildPrismaWhere, buildPrismaOrderBy } from './queryBuilder.js';
 
 /**
  * Logs a new material purchase and updates the branch's stock and weighted average cost.
@@ -110,41 +111,17 @@ export async function logPurchase(data) {
  * @returns A paginated response of purchase records with related material, branch, and user data.
  */
 export async function getPurchaseHistory(
-  filters,
+  filters = {},
   params = {}
 ) {
-  const { branchId, materialId, startDate, endDate } = filters;
-  const { search, sortBy, sortOrder } = params;
+  const mergedFilters = { ...params, ...filters };
+  const where = buildPrismaWhere(mergedFilters, {
+    allowedKeys: ['branchId', 'materialId'],
+    dateField: 'purchaseDate',
+    searchFields: ['invoiceRef', 'supplier', 'material.name']
+  });
+  const orderBy = buildPrismaOrderBy(params, { purchaseDate: 'desc' });
   const { skip, take } = getPrismaPagination(params);
-
-  const where = {};
-  if (branchId) where.branchId = branchId;
-  if (materialId) where.materialId = materialId;
-  if (startDate || endDate) {
-    where.purchaseDate = {};
-    if (startDate) where.purchaseDate.gte = startDate;
-    if (endDate) where.purchaseDate.lte = endDate;
-  }
-
-  if (search) {
-    where.OR = [
-      { invoiceRef: { contains: search } },
-      { supplier: { contains: search } },
-      { material: { name: { contains: search } } },
-    ];
-  }
-
-  const orderBy = {};
-  if (sortBy) {
-    if (sortBy.includes('.')) {
-      const [relation, field] = sortBy.split('.');
-      orderBy[relation] = { [field]: sortOrder || 'asc' };
-    } else {
-      orderBy[sortBy] = sortOrder || 'asc';
-    }
-  } else {
-    orderBy.purchaseDate = 'desc';
-  }
 
   const [purchases, total] = await Promise.all([
     prisma.purchase.findMany({

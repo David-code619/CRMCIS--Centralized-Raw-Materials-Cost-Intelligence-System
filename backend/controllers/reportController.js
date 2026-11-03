@@ -7,139 +7,51 @@ import {
   getInventoryValueTrend,
   getShrinkageMetrics
 } from "../lib/reportService.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import { withDefaultDateRange } from "../lib/queryBuilder.js";
 
-export const getStats = async (req, res) => {
-  let branchId = null;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const stats = await getDashboardStats(branchId, req.user);
-    res.json(stats);
-  } catch (error) {
-    console.error("Dashboard stats fetch error:", error);
-    res.status(500).json({ error: "Failed to fetch dashboard stats" });
-  }
-};
+export const getStats = asyncHandler(async (req, res) => {
+  const stats = await getDashboardStats(req.branchId, req.user);
+  res.json(stats);
+});
 
-/**
- * Helper: merge branchId and query params into a single filters object
- * with proper Date conversions for startDate/endDate.
- */
-function buildFilters(branchId, query = {}) {
-  const { materialId, category, startDate, endDate } = query;
+export const getKPIs = asyncHandler(async (req, res) => {
+  const filters = withDefaultDateRange(req.filters, 90);
+  const kpis = await getReportKPIs(filters);
+  res.json(kpis);
+});
 
-  const now = new Date();
-  const defaultStart = new Date(now);
-  defaultStart.setMonth(defaultStart.getMonth() - 3);
+export const getComparison = asyncHandler(async (req, res) => {
+  // Branch comparison compares all branches, so branchId is omitted
+  const filters = withDefaultDateRange({ ...req.filters, branchId: undefined }, 90);
+  const comparison = await getBranchComparison(filters);
+  res.json(comparison);
+});
 
-  const parsedStart = startDate ? new Date(startDate) : defaultStart;
-  const parsedEnd = endDate ? new Date(endDate) : now;
+export const getCostTrends = asyncHandler(async (req, res) => {
+  const filters = withDefaultDateRange(req.filters, 90);
+  const trends = await getReportCostTrends(filters);
+  res.json(trends);
+});
 
-  // Ensure the end date covers the full day
-  if (endDate) {
-    parsedEnd.setHours(23, 59, 59, 999);
-  }
+export const getTopConsumed = asyncHandler(async (req, res) => {
+  const filters = withDefaultDateRange(req.filters, 90);
+  const data = await getTopConsumedMaterials(filters);
+  res.json(data);
+});
 
-  return {
-    branchId: branchId || undefined,
-    materialId: materialId || undefined,
-    category: category || undefined,
-    startDate: parsedStart,
-    endDate: parsedEnd,
-  };
-}
+export const getValueTrend = asyncHandler(async (req, res) => {
+  const filters = withDefaultDateRange(req.filters, 90);
+  const data = await getInventoryValueTrend(filters);
+  res.json(data);
+});
 
-export const getKPIs = async (req, res) => {
-  let branchId = null;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const filters = buildFilters(branchId, req.query);
-    const kpis = await getReportKPIs(filters);
-    res.json(kpis);
-  } catch (error) {
-    console.error("KPI fetch error:", error);
-    res.status(500).json({ error: "Failed to fetch report KPIs" });
-  }
-};
-
-export const getComparison = async (req, res) => {
-  try {
-    const filters = buildFilters(null, req.query);
-    const comparison = await getBranchComparison(filters);
-    res.json(comparison);
-  } catch (error) {
-    console.error("Branch comparison error:", error);
-    res.status(500).json({ error: "Failed to fetch branch comparison" });
-  }
-};
-
-export const getCostTrends = async (req, res) => {
-  let branchId = null;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const filters = buildFilters(branchId, req.query);
-    const trends = await getReportCostTrends(filters);
-    res.json(trends);
-  } catch (error) {
-    console.error("Cost trends error:", error);
-    res.status(500).json({ error: "Failed to fetch cost trends" });
-  }
-};
-
-export const getTopConsumed = async (req, res) => {
-  let branchId = null;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const filters = buildFilters(branchId, req.query);
-    const data = await getTopConsumedMaterials(filters);
-    res.json(data);
-  } catch (error) {
-    console.error("Top consumed materials error:", error);
-    res.status(500).json({ error: "Failed to fetch top consumed materials" });
-  }
-};
-
-export const getValueTrend = async (req, res) => {
-  let branchId = null;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const filters = buildFilters(branchId, req.query);
-    const data = await getInventoryValueTrend(filters);
-    res.json(data);
-  } catch (error) {
-    console.error("Inventory value trend error:", error);
-    res.status(500).json({ error: "Failed to fetch inventory value trend" });
-  }
-};
-
-export const getShrinkage = async (req, res) => {
-  let { branchId, startDate, endDate } = req.query;
-  
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-
-  try {
-    const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30));
-    const end = endDate ? new Date(endDate) : new Date();
-    
-    if (endDate) {
-      end.setHours(23, 59, 59, 999);
-    }
-
-    const metrics = await getShrinkageMetrics({ branchId, startDate: start, endDate: end });
-    res.json(metrics);
-  } catch (error) {
-    console.error("Shrinkage report error:", error);
-    res.status(500).json({ error: "Failed to fetch shrinkage metrics" });
-  }
-};
+export const getShrinkage = asyncHandler(async (req, res) => {
+  const filters = withDefaultDateRange(req.filters, 30);
+  const metrics = await getShrinkageMetrics({
+    branchId: req.branchId,
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+  });
+  res.json(metrics);
+});

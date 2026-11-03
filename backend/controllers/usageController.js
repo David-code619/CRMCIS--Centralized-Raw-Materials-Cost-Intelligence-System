@@ -3,44 +3,24 @@ import {
   logUsage,
   auditAllUsageLogs
 } from "../lib/usageService.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
-export const listUsageLogs = async (req, res) => {
-  let { branchId } = req.query;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const logs = await getUsageHistory({ branchId }, req.query);
-    res.json(logs);
-  } catch (error) {
-    console.error("Failed to fetch usage logs:", error);
-    res.status(500).json({ error: "Failed to fetch usage logs" });
-  }
-};
+export const listUsageLogs = asyncHandler(async (req, res) => {
+  const logs = await getUsageHistory(req.filters, req.pagination);
+  res.json(logs);
+});
 
-export const recordUsage = async (req, res) => {
-  const data = { ...req.body, loggedById: req.user.id };
-  if (req.user.role !== "SUPER_ADMIN") {
-    data.branchId = req.user.branchId;
-  }
-  try {
-    const log = await logUsage(data);
-    res.status(201).json(log);
-  } catch (error) {
-    res.status(500).json({ error: error.message || "Failed to record usage" });
-  }
-};
+export const recordUsage = asyncHandler(async (req, res) => {
+  const data = { 
+    ...req.body, 
+    loggedById: req.user.id,
+    branchId: req.branchId || req.body.branchId
+  };
+  const log = await logUsage(data);
+  res.status(201).json(log);
+});
 
-export const auditLogs = async (req, res) => {
-  let branchId = null;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const result = await auditAllUsageLogs(branchId);
-    res.json(result);
-  } catch (error) {
-    console.error("Failed to audit usage logs:", error);
-    res.status(500).json({ error: "Failed to audit usage logs" });
-  }
-};
+export const auditLogs = asyncHandler(async (req, res) => {
+  const result = await auditAllUsageLogs(req.branchId);
+  res.json(result);
+});

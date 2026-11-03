@@ -12,140 +12,70 @@ import {
   getGlobalBranchMaterialStats,
   getBranchMaterialBreakdown
 } from "../lib/branchMaterialService.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
-// Catalog Controllers
-export const getCatalog = async (req, res) => {
-  try {
-    const { category, search, sortBy, sortOrder, page, limit } = req.query;
-    const materials = await getMaterialCatalog(
-      { category },
-      { search, sortBy, sortOrder, page, limit }
-    );
-    res.json(materials);
-  } catch (error) {
-    console.error("Failed to fetch materials:", error);
-    res.status(500).json({ error: "Failed to fetch materials" });
-  }
-};
+// Global Catalog Controllers
+export const getCatalog = asyncHandler(async (req, res) => {
+  const materials = await getMaterialCatalog(req.filters, req.pagination);
+  res.json(materials);
+});
 
-export const addMaterial = async (req, res) => {
-  try {
-    const material = await createMaterial(req.body);
-    res.status(201).json(material);
-  } catch (error) {
-    console.error("Failed to create material:", error);
-    res.status(500).json({ error: "Failed to create material" });
-  }
-};
+export const addMaterial = asyncHandler(async (req, res) => {
+  const material = await createMaterial(req.body);
+  res.status(201).json(material);
+});
 
-export const editMaterial = async (req, res) => {
-  try {
-    const material = await updateMaterial(req.params.id, req.body);
-    res.json(material);
-  } catch (error) {
-    console.error("Failed to update material:", error);
-    res.status(500).json({ error: "Failed to update material" });
-  }
-};
+export const editMaterial = asyncHandler(async (req, res) => {
+  const material = await updateMaterial(req.params.id, req.body);
+  res.json(material);
+});
 
-export const removeMaterial = async (req, res) => {
-  try {
-    await deleteMaterial(req.params.id);
-    res.status(204).end();
-  } catch (error) {
-    console.error("Failed to delete material:", error);
-    res.status(500).json({ error: "Failed to delete material" });
-  }
-};
+export const removeMaterial = asyncHandler(async (req, res) => {
+  await deleteMaterial(req.params.id);
+  res.status(204).end();
+});
 
 // Branch Material Controllers
-export const getBranchStats = async (req, res) => {
-  try {
-    const stats = await getGlobalBranchMaterialStats(req.query);
-    res.json(stats);
-  } catch (error) {
-    console.error("Error fetching global branch material stats:", error);
-    res.status(500).json({ error: "Failed to fetch branch material stats" });
-  }
-};
+export const getBranchStats = asyncHandler(async (req, res) => {
+  const stats = await getGlobalBranchMaterialStats(req.filters || req.query);
+  res.json(stats);
+});
 
-export const getBreakdown = async (req, res) => {
-  try {
-    const breakdown = await getBranchMaterialBreakdown(req.params.materialId);
-    res.json(breakdown);
-  } catch (error) {
-    console.error("Error fetching branch material breakdown:", error);
-    res.status(500).json({ error: "Failed to fetch branch material breakdown" });
-  }
-};
+export const getBreakdown = asyncHandler(async (req, res) => {
+  const breakdown = await getBranchMaterialBreakdown(req.params.materialId);
+  res.json(breakdown);
+});
 
-export const listBranchMaterials = async (req, res) => {
-  let { branchId, category, isActive, status, search, sortBy, sortOrder, page, limit } = req.query;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-  try {
-    const materials = await getBranchMaterials(
-      branchId,
-      { category, isActive, status },
-      { search, sortBy, sortOrder, page, limit }
-    );
-    res.json(materials);
-  } catch (error) {
-    console.error("Failed to fetch branch materials:", error);
-    res.status(500).json({ error: "Failed to fetch branch materials" });
-  }
-};
+export const listBranchMaterials = asyncHandler(async (req, res) => {
+  const materials = await getBranchMaterials(req.filters, req.pagination);
+  res.json(materials);
+});
 
-export const getSpecificBranchMaterials = async (req, res) => {
+export const getSpecificBranchMaterials = asyncHandler(async (req, res) => {
   const branchId = req.params.id;
   if (req.user.role !== "SUPER_ADMIN" && req.user.branchId !== branchId) {
     return res.status(403).json({ error: "Forbidden: You can only access your own branch's materials" });
   }
-  try {
-    const { category, isActive, status, search, sortBy, sortOrder, page, limit } = req.query;
-    const materials = await getBranchMaterials(
-      branchId,
-      { category, isActive, status },
-      { search, sortBy, sortOrder, page, limit }
-    );
-    res.json(materials);
-  } catch (error) {
-    console.error("Error fetching branch materials:", error);
-    res.status(500).json({ error: "Failed to fetch branch materials" });
-  }
-};
 
-export const linkMaterialToBranch = async (req, res) => {
-  const data = { ...req.body };
-  if (req.user.role !== "SUPER_ADMIN") {
-    data.branchId = req.user.branchId;
-  }
-  try {
-    const material = await addMaterialToBranch(data);
-    res.status(201).json(material);
-  } catch (error) {
-    console.error("Failed to add material to branch:", error);
-    res.status(500).json({ error: "Failed to add material to branch" });
-  }
-};
+  const materials = await getBranchMaterials(branchId, req.filters, req.pagination);
+  res.json(materials);
+});
 
-export const updateBranchLink = async (req, res) => {
-  try {
-    const material = await updateBranchMaterial(req.params.id, req.body);
-    res.json(material);
-  } catch (error) {
-    console.error("Failed to update branch material:", error);
-    res.status(500).json({ error: "Failed to update branch material" });
-  }
-};
+export const linkMaterialToBranch = asyncHandler(async (req, res) => {
+  const data = { 
+    ...req.body, 
+    branchId: req.branchId || req.body.branchId 
+  };
+  const material = await addMaterialToBranch(data);
+  res.status(201).json(material);
+});
 
-export const deleteBranchLink = async (req, res) => {
-  try {
-    await deleteBranchMaterial(req.params.id);
-    res.status(204).end();
-  } catch (error) {
-    console.error("Failed to delete branch material:", error);
-    res.status(500).json({ error: "Failed to delete branch material" });
-  }
-};
+export const updateBranchLink = asyncHandler(async (req, res) => {
+  const material = await updateBranchMaterial(req.params.id, req.body);
+  res.json(material);
+});
+
+export const deleteBranchLink = asyncHandler(async (req, res) => {
+  await deleteBranchMaterial(req.params.id);
+  res.status(204).end();
+});

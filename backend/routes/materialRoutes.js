@@ -6,17 +6,25 @@ import {
   removeMaterial,
 } from "../controllers/materialController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
+import { parseQuery } from "../middleware/parseQuery.js";
 
 const router = express.Router();
 
 router.use(authenticate);
 
-// Catalog routes — GET /api/materials serves the catalog (frontend expects this)
-router.get("/", getCatalog);
-router.get("/catalog", getCatalog);
-router.post("/", authorize(["SUPER_ADMIN"]), addMaterial);
-router.post("/catalog", authorize(["SUPER_ADMIN"]), addMaterial);
-router.patch("/:id", authorize(["SUPER_ADMIN"]), editMaterial);
-router.delete("/:id", authorize(["SUPER_ADMIN"]), removeMaterial);
+// Global Material Catalog Collection
+router.route("/")
+  .get(parseQuery, getCatalog)
+  .post(authorize(["SUPER_ADMIN"]), addMaterial);
+
+// Aliases for backwards compatibility
+router.route("/catalog")
+  .get(parseQuery, getCatalog)
+  .post(authorize(["SUPER_ADMIN"]), addMaterial);
+
+// Single Material Operations
+router.route("/:id")
+  .patch(authorize(["SUPER_ADMIN"]), editMaterial)
+  .delete(authorize(["SUPER_ADMIN"]), removeMaterial);
 
 export default router;

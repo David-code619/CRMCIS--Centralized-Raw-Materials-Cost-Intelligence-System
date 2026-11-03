@@ -3,56 +3,22 @@ import {
   getInventoryHistory,
   getInventoryStats,
 } from "../lib/inventoryService.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
-export const getInventory = async (req, res) => {
-  let { branchId } = req.query;
+export const getInventory = asyncHandler(async (req, res) => {
+  const inventory = await getInventoryByBranch(req.branchId);
+  res.json({
+    data: inventory,
+    pagination: { totalItems: inventory.length, totalPages: 1 },
+  });
+});
 
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
+export const getStats = asyncHandler(async (req, res) => {
+  const stats = await getInventoryStats(req.branchId);
+  res.json(stats);
+});
 
-  try {
-    const inventory = await getInventoryByBranch(branchId);
-    res.json({
-      data: inventory,
-      pagination: { totalItems: inventory.length, totalPages: 1 },
-    });
-  } catch (error) {
-    console.error("Inventory fetch error:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch inventory", details: error.message });
-  }
-};
-
-export const getStats = async (req, res) => {
-  let { branchId } = req.query;
-
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-
-  try {
-    const stats = await getInventoryStats(branchId);
-    res.json(stats);
-  } catch (error) {
-    console.error("Failed to fetch inventory stats:", error);
-    res.status(500).json({ error: "Failed to fetch inventory stats" });
-  }
-};
-
-export const getHistory = async (req, res) => {
-  let { branchId, materialId } = req.query;
-
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
-  }
-
-  try {
-    const history = await getInventoryHistory(branchId, materialId);
-    res.json(history);
-  } catch (error) {
-    console.error("Failed to fetch inventory history:", error);
-    res.status(500).json({ error: "Failed to fetch inventory history" });
-  }
-};
+export const getHistory = asyncHandler(async (req, res) => {
+  const history = await getInventoryHistory(req.branchId, req.query.materialId);
+  res.json(history);
+});

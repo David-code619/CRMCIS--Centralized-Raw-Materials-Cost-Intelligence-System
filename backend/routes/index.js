@@ -15,21 +15,31 @@ import systemRoutes from "./systemRoutes.js";
 
 const router = express.Router();
 
+// Authentication & Users
 router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
+
+// Core Inventory & Catalogs
 router.use("/inventory", inventoryRoutes);
-router.use("/materials", materialRoutes);           // Material catalog CRUD
-router.use("/branch-materials", branchMaterialRoutes); // Branch material distribution
-router.use("/usage", usageRoutes);
+router.use("/materials", materialRoutes);                 // Global material catalog CRUD
+router.use("/branch-materials", branchMaterialRoutes);   // Branch material link & stock levels
+router.use("/branches", branchRoutes);                    // Branches and branch-specific material associations
+
+// Transactions & Stock Movements
 router.use("/purchases", purchaseRoutes);
+router.use("/usage", usageRoutes);
 router.use("/adjustments", adjustmentRoutes);
 router.use("/transfers", transferRoutes);
-router.use("/notifications", notificationRoutes);
-router.use("/users", userRoutes);
-router.use("/reports", reportRoutes);
-router.use("/branches", branchRoutes);              // Branch list + branch-specific material routes
-router.use("/system", systemRoutes);
-router.use("/stats", reportRoutes);                 // Dashboard stats
 
+// Analytics, Reports & Dashboards
+router.use("/reports", reportRoutes);
+router.use("/stats", reportRoutes);                       // Compatibility alias for dashboard stats
+
+// System & Notifications
+router.use("/notifications", notificationRoutes);
+router.use("/system", systemRoutes);
+
+// Root System Aliases
 router.get("/health", (req, res) => res.redirect("/api/system/health"));
 router.get("/ping", (req, res) => res.redirect("/api/system/ping"));
 

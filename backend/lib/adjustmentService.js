@@ -10,6 +10,7 @@ import { prisma } from './prisma.js';
 import { calculateShrinkageRate } from './inventoryUtils.js';
 import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.js';
 import { notifyRoles, createNotification } from './notificationService.js';
+import { buildPrismaWhere, buildPrismaOrderBy } from './queryBuilder.js';
 
 /**
  * Records a new stock adjustment request.
@@ -180,41 +181,17 @@ export async function getShrinkageMetrics(branchId, startDate, endDate) {
  * @returns A paginated response of adjustment records with related material, branch, and user data.
  */
 export async function getAdjustmentHistory(
-  filters,
+  filters = {},
   params = {}
 ) {
-  const { branchId, materialId, status, startDate, endDate } = filters;
-  const { search, sortBy, sortOrder } = params;
+  const mergedFilters = { ...params, ...filters };
+  const where = buildPrismaWhere(mergedFilters, {
+    allowedKeys: ['branchId', 'materialId', 'status'],
+    dateField: 'adjustmentDate',
+    searchFields: ['notes', 'material.name']
+  });
+  const orderBy = buildPrismaOrderBy(params, { adjustmentDate: 'desc' });
   const { skip, take } = getPrismaPagination(params);
-
-  const where = {};
-  if (branchId) where.branchId = branchId;
-  if (materialId) where.materialId = materialId;
-  if (status) where.status = status;
-  if (startDate || endDate) {
-    where.adjustmentDate = {};
-    if (startDate) where.adjustmentDate.gte = startDate;
-    if (endDate) where.adjustmentDate.lte = endDate;
-  }
-
-  if (search) {
-    where.OR = [
-      { notes: { contains: search } },
-      { material: { name: { contains: search } } },
-    ];
-  }
-
-  const orderBy = {};
-  if (sortBy) {
-    if (sortBy.includes('.')) {
-      const [relation, field] = sortBy.split('.');
-      orderBy[relation] = { [field]: sortOrder || 'asc' };
-    } else {
-      orderBy[sortBy] = sortOrder || 'asc';
-    }
-  } else {
-    orderBy.adjustmentDate = 'desc';
-  }
 
   const [adjustments, total] = await Promise.all([
     prisma.stockAdjustment.findMany({

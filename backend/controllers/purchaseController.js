@@ -2,35 +2,24 @@ import {
   getPurchaseHistory, 
   logPurchase 
 } from "../lib/purchaseService.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
-export const listPurchaseLogs = async (req, res) => {
-  let { branchId } = req.query;
-  if (req.user.role !== "SUPER_ADMIN") {
-    branchId = req.user.branchId;
+export const listPurchaseLogs = asyncHandler(async (req, res) => {
+  const logs = await getPurchaseHistory(req.filters, req.pagination);
+  res.json(logs);
+});
+
+export const recordPurchase = asyncHandler(async (req, res) => {
+  const data = { 
+    ...req.body, 
+    loggedById: req.user.id,
+    branchId: req.branchId || req.body.branchId 
+  };
+
+  if (!data.branchId) {
+    return res.status(400).json({ error: "Branch ID is required to log a purchase" });
   }
-  try {
-    const logs = await getPurchaseHistory({ branchId }, req.query);
-    res.json(logs);
-  } catch (error) {
-    console.error("Failed to fetch purchase logs:", error);
-    res.status(500).json({ error: "Failed to fetch purchase logs" });
-  }
-};
 
-export const recordPurchase = async (req, res) => {
-  try {
-    const data = { ...req.body, loggedById: req.user.id };
-    if (req.user.role !== "SUPER_ADMIN" || !data.branchId) {
-      data.branchId = req.user.branchId;
-    }
-
-    if (!data.branchId) {
-      return res.status(400).json({ error: "Branch ID is required to log a purchase" });
-    }
-
-    const log = await logPurchase(data);
-    res.status(201).json(log);
-  } catch (error) {
-    res.status(500).json({ error: error.message || "Failed to record purchase" });
-  }
-};
+  const log = await logPurchase(data);
+  res.status(201).json(log);
+});

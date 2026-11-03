@@ -5,13 +5,26 @@ import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.
  * Fetches materials for a specific branch with pagination and search.
  */
 export async function getBranchMaterials(
-  branchId,
-  filters = {},
+  branchIdOrFilters,
+  maybeFilters = {},
   params = {}
 ) {
+  let branchId;
+  let filters;
+  if (typeof branchIdOrFilters === 'string' || branchIdOrFilters === null) {
+    branchId = branchIdOrFilters;
+    filters = maybeFilters;
+  } else {
+    filters = branchIdOrFilters || {};
+    branchId = filters.branchId;
+    params = maybeFilters;
+  }
+
+  const mergedParams = { ...params };
   const { category, isActive, status } = filters;
-  const { search, sortBy, sortOrder } = params;
-  const { skip, take } = getPrismaPagination(params);
+  const search = filters.search || mergedParams.search;
+  const { sortBy, sortOrder } = mergedParams;
+  const { skip, take } = getPrismaPagination(mergedParams);
 
   const where = {};
   if (branchId) where.branchId = branchId;

@@ -10,6 +10,7 @@ import { prisma } from './prisma.js';
 import { isUsageSuspicious, wouldResultInNegativeStock } from './inventoryUtils.js';
 import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.js';
 import { notifyRoles } from './notificationService.js';
+import { buildPrismaWhere, buildPrismaOrderBy } from './queryBuilder.js';
 
 /**
  * Records a new material usage log and updates branch inventory.
@@ -124,41 +125,18 @@ export async function logUsage(data) {
  * @returns A paginated response of usage records with related material, branch, and user data.
  */
 export async function getUsageHistory(
-  filters,
+  filters = {},
   params = {}
 ) {
-  const { branchId, materialId, isSuspicious, startDate, endDate } = filters;
-  const { search, sortBy, sortOrder } = params;
+  const mergedFilters = { ...params, ...filters };
+  const where = buildPrismaWhere(mergedFilters, {
+    allowedKeys: ['branchId', 'materialId'],
+    booleanKeys: ['isSuspicious'],
+    dateField: 'usageDate',
+    searchFields: ['material.name', 'branch.name']
+  });
+  const orderBy = buildPrismaOrderBy(params, { usageDate: 'desc' });
   const { skip, take } = getPrismaPagination(params);
-
-  const where = {};
-  if (branchId) where.branchId = branchId;
-  if (materialId) where.materialId = materialId;
-  if (isSuspicious !== undefined) where.isSuspicious = isSuspicious;
-  if (startDate || endDate) {
-    where.usageDate = {};
-    if (startDate) where.usageDate.gte = startDate;
-    if (endDate) where.usageDate.lte = endDate;
-  }
-
-  if (search) {
-    where.OR = [
-      { material: { name: { contains: search } } },
-      { branch: { name: { contains: search } } },
-    ];
-  }
-
-  const orderBy = {};
-  if (sortBy) {
-    if (sortBy.includes('.')) {
-      const [relation, field] = sortBy.split('.');
-      orderBy[relation] = { [field]: sortOrder || 'asc' };
-    } else {
-      orderBy[sortBy] = sortOrder || 'asc';
-    }
-  } else {
-    orderBy.usageDate = 'desc';
-  }
 
   const [usageLogs, total] = await Promise.all([
     prisma.usageLog.findMany({

@@ -10,6 +10,7 @@ import { prisma } from './prisma.js';
 import { wouldResultInNegativeStock } from './inventoryUtils.js';
 import { getPrismaPagination, formatPaginatedResponse } from './paginationUtils.js';
 import { notifyRoles, createNotification } from './notificationService.js';
+import { buildPrismaOrderBy } from './queryBuilder.js';
 
 /**
  * Creates a new transfer request.
@@ -224,20 +225,20 @@ export async function completeTransfer(transferId) {
  * @returns A paginated response of transfer records with related material, branch, and user data.
  */
 export async function getTransferHistory(
-  filters,
+  filters = {},
   params = {}
 ) {
-  const { branchId, status, isSource } = filters;
-  const { search, sortBy, sortOrder } = params;
+  const mergedFilters = { ...params, ...filters };
+  const { branchId, status, isSource, search } = mergedFilters;
   const { skip, take } = getPrismaPagination(params);
 
   const where = {};
   if (status) where.status = status;
   
   if (branchId) {
-    if (isSource === true) {
+    if (isSource === true || isSource === 'true') {
       where.fromBranchId = branchId;
-    } else if (isSource === false) {
+    } else if (isSource === false || isSource === 'false') {
       where.toBranchId = branchId;
     } else {
       where.OR = [
@@ -250,15 +251,14 @@ export async function getTransferHistory(
   if (search) {
     const searchCondition = {
       OR: [
-        { notes: { contains: search } },
-        { material: { name: { contains: search } } },
-        { fromBranch: { name: { contains: search } } },
-        { toBranch: { name: { contains: search } } },
+        { notes: { contains: search, mode: 'insensitive' } },
+        { material: { name: { contains: search, mode: 'insensitive' } } },
+        { fromBranch: { name: { contains: search, mode: 'insensitive' } } },
+        { toBranch: { name: { contains: search, mode: 'insensitive' } } },
       ]
     };
 
     if (where.OR) {
-      // If we already have an OR for branchId, we need to wrap it in an AND
       const existingOR = where.OR;
       delete where.OR;
       where.AND = [
@@ -270,17 +270,7 @@ export async function getTransferHistory(
     }
   }
 
-  const orderBy = {};
-  if (sortBy) {
-    if (sortBy.includes('.')) {
-      const [relation, field] = sortBy.split('.');
-      orderBy[relation] = { [field]: sortOrder || 'asc' };
-    } else {
-      orderBy[sortBy] = sortOrder || 'asc';
-    }
-  } else {
-    orderBy.createdAt = 'desc';
-  }
+  const orderBy = buildPrismaOrderBy(params, { createdAt: 'desc' });
 
   const [transfers, total] = await Promise.all([
     prisma.transfer.findMany({

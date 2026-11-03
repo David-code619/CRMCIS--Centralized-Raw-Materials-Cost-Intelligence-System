@@ -1,21 +1,33 @@
 import express from "express";
 import { 
-  getBranchStats, getBreakdown, listBranchMaterials, 
+  getBranchStats, 
+  getBreakdown, 
+  listBranchMaterials, 
   linkMaterialToBranch,
-  updateBranchLink, deleteBranchLink
+  updateBranchLink, 
+  deleteBranchLink 
 } from "../controllers/materialController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
+import { scopeBranch } from "../middleware/scopeBranch.js";
+import { parseQuery } from "../middleware/parseQuery.js";
 
 const router = express.Router();
 
 router.use(authenticate);
+router.use(scopeBranch);
 
-// Branch material routes — mounted at /api/branch-materials
-router.get("/branch-stats", authorize(["SUPER_ADMIN"]), getBranchStats);
+// Special Analytics Endpoints
+router.get("/branch-stats", authorize(["SUPER_ADMIN"]), parseQuery, getBranchStats);
 router.get("/:materialId/breakdown", authorize(["SUPER_ADMIN"]), getBreakdown);
-router.get("/", listBranchMaterials);
-router.post("/", linkMaterialToBranch);
-router.patch("/:id", updateBranchLink);
-router.delete("/:id", deleteBranchLink);
+
+// Branch Materials Collection
+router.route("/")
+  .get(parseQuery, listBranchMaterials)
+  .post(linkMaterialToBranch);
+
+// Individual Branch Material Link
+router.route("/:id")
+  .patch(updateBranchLink)
+  .delete(deleteBranchLink);
 
 export default router;
